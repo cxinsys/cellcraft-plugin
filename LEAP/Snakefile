@@ -35,5 +35,5 @@ rule Run:
         stdout="user/{user_name}/workflow_{workflow_id}/algorithm_{algorithm_id}/logs/Run.stdout",
         stderr="user/{user_name}/workflow_{workflow_id}/algorithm_{algorithm_id}/logs/Run.stderr"
     shell:
-        "if [ -d "/opt/r_env" ] && [ -f "/opt/r_env/renv/activate.R" ]; then export R_LIBS_USER=/opt/r_env/renv/library && export RENV_PROJECT=/opt/r_env; else export R_LIBS_USER=/opt/r_env/library && export RENV_PROJECT=/opt/r_env; fi; Rscript plugin/LEAP/scripts/leap_for_cellcraft.R {input.expression} {input.trajectory} {input.cellSelect} {params.maxLag} {params.FDR} {params.number_of_outdegrees} {output.GRN} {output.GRNOutdegree} > {log.stdout} 2> {log.stderr}"
+        "export R_LIBS_USER=/workspace/dependency/renv/library/linux-debian-bullseye/R-4.4/x86_64-conda-linux-gnu:/opt/micromamba/envs/plugin_env/lib/R/library && export R_HOME=/opt/micromamba/envs/plugin_env/lib/R && export RENV_CONFIG_AUTOLOADER_ENABLED=FALSE && /opt/micromamba/envs/plugin_env/bin/Rscript plugin/LEAP/scripts/leap_for_cellcraft.R {input.expression} {input.trajectory} {input.cellSelect} {params.maxLag} {params.FDR} {params.number_of_outdegrees} {output.GRN} {output.GRNOutdegree} > {log.stdout} 2> {log.stderr}"
 
