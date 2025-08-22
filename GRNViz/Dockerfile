@@ -112,7 +112,6 @@ RUN mkdir -p /workspace/logs && \
 
 # Snakefile 복사
 COPY Snakefile /workspace/Snakefile
-COPY visualization_Snakefile /workspace/visualization_Snakefile
 
 # scripts 폴더 복사
 COPY scripts/ /scripts/

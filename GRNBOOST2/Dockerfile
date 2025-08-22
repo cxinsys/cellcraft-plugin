@@ -61,7 +61,6 @@ RUN mkdir -p /workspace/logs && \
     chmod 777 /workspace
 
 COPY Snakefile /workspace/Snakefile
-COPY visualization_Snakefile /workspace/visualization_Snakefile
 
 COPY scripts/ /scripts/
 

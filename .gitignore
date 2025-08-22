@@ -5,3 +5,5 @@ test_plugins_csv.py
 init_db.py
 
 plugin_initialization.csv
+
+Dockerfile.TENET.legacy

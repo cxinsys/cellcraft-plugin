@@ -19,7 +19,15 @@ RUN apt-get update && apt-get install -y \
     software-properties-common \
     gnupg ca-certificates \
     zlib1g-dev \
+    default-jdk \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Java 환경변수 설정
+ENV JAVA_HOME=/usr/lib/jvm/default-java
+ENV PATH=$JAVA_HOME/bin:$PATH
+
+# Java 버전 확인
+RUN java -version && javac -version
 
 COPY dependency/ /workspace/dependency/
 
@@ -61,7 +69,6 @@ RUN mkdir -p /workspace/logs && \
     chmod 777 /workspace
 
 COPY Snakefile /workspace/Snakefile
-COPY visualization_Snakefile /workspace/visualization_Snakefile
 
 COPY scripts/ /scripts/
 
