@@ -14,7 +14,7 @@ rule Heatmap:
         stdout="user/{user_name}/workflow_{workflow_id}/algorithm_{algorithm_id}/logs/Heatmap.stdout",
         stderr="user/{user_name}/workflow_{workflow_id}/algorithm_{algorithm_id}/logs/Heatmap.stderr"
     shell:
-        "export R_LIBS_USER=/workspace/dependency/renv/library/linux-debian-bullseye/R-4.4/x86_64-conda-linux-gnu:/opt/micromamba/envs/plugin_env/lib/R/library && export R_HOME=/opt/micromamba/envs/plugin_env/lib/R && export RENV_CONFIG_AUTOLOADER_ENABLED=FALSE && /opt/micromamba/envs/plugin_env/bin/Rscript plugin/GRNViz/scripts/Pseudotime_heatmap.R {input.expression} {input.trajectory} {input.input} {output.Heatmap} {params.Top_Genes} {params.Sample_Size} > {log.stdout} 2> {log.stderr}"
+        "export R_LIBS_USER=/workspace/dependency/renv/library/linux-debian-bullseye/R-4.4/x86_64-conda-linux-gnu:/opt/micromamba/envs/plugin_env/lib/R/library && export R_HOME=/opt/micromamba/envs/plugin_env/lib/R && export RENV_CONFIG_AUTOLOADER_ENABLED=FALSE && /opt/micromamba/envs/plugin_env/bin/Rscript /scripts/Pseudotime_heatmap.R {input.expression} {input.trajectory} {input.input} {output.Heatmap} {params.Top_Genes} {params.Sample_Size} > {log.stdout} 2> {log.stderr}"
 
 rule Barplot:
     input:
@@ -27,7 +27,7 @@ rule Barplot:
         stdout="user/{user_name}/workflow_{workflow_id}/algorithm_{algorithm_id}/logs/Barplot.stdout",
         stderr="user/{user_name}/workflow_{workflow_id}/algorithm_{algorithm_id}/logs/Barplot.stderr"
     shell:
-        "/opt/micromamba/envs/plugin_env/bin/python plugin/GRNViz/scripts/Barplot.py {input.input} {output.Barplot} {params.Top_Genes} > {log.stdout} 2> {log.stderr}"
+        "/opt/micromamba/envs/plugin_env/bin/python /scripts/Barplot.py {input.input} {output.Barplot} {params.Top_Genes} > {log.stdout} 2> {log.stderr}"
 
 rule Network:
     input:
@@ -40,5 +40,5 @@ rule Network:
         stdout="user/{user_name}/workflow_{workflow_id}/algorithm_{algorithm_id}/logs/Network.stdout",
         stderr="user/{user_name}/workflow_{workflow_id}/algorithm_{algorithm_id}/logs/Network.stderr"
     shell:
-        "/opt/micromamba/envs/plugin_env/bin/python plugin/GRNViz/scripts/NetworkX.py {input.input} {output.Network} {params.Top_Genes} > {log.stdout} 2> {log.stderr}"
+        "/opt/micromamba/envs/plugin_env/bin/python /scripts/NetworkX.py {input.input} {output.Network} {params.Top_Genes} > {log.stdout} 2> {log.stderr}"
 

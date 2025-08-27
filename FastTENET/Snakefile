@@ -17,7 +17,7 @@ rule TENET_Input:
         stdout="user/{user_name}/workflow_{workflow_id}/algorithm_{algorithm_id}/logs/TENET_Input.stdout",
         stderr="user/{user_name}/workflow_{workflow_id}/algorithm_{algorithm_id}/logs/TENET_Input.stderr"
     shell:
-        "/opt/micromamba/envs/plugin_env/bin/python plugin/FastTENET/scripts/tenet_input.py {input.input} {params.geneList} {params.UMAP_lasso} {output.expression} {output.trajectory} {output.cellSelect} {params.cell_group} {params.pseudotime} '{params.clusters}' > {log.stdout} 2> {log.stderr}"
+        "/opt/micromamba/envs/plugin_env/bin/python /scripts/tenet_input.py {input.input} {params.geneList} {params.UMAP_lasso} {output.expression} {output.trajectory} {output.cellSelect} {params.cell_group} {params.pseudotime} '{params.clusters}' > {log.stdout} 2> {log.stderr}"
 
 rule Run:
     input:
@@ -41,5 +41,5 @@ rule Run:
         stdout="user/{user_name}/workflow_{workflow_id}/algorithm_{algorithm_id}/logs/Run.stdout",
         stderr="user/{user_name}/workflow_{workflow_id}/algorithm_{algorithm_id}/logs/Run.stderr"
     shell:
-        "/opt/micromamba/envs/plugin_env/bin/python plugin/FastTENET/scripts/fasttenet_for_cellcraft.py {input.expression} {input.trajectory} {input.cellSelect} {params.TF} {output.resultMatrixFDR} {output.resultMatrixFdrTrim} {output.resultMatrixFdrOutdegree} {output.resultMatrixFdrTrimOutdegree} {params.backend} {params.number_of_devices} {params.batch_size} {params.FDR} {params.number_of_outdegrees} {params.trimming_threshold} > {log.stdout} 2> {log.stderr}"
+        "/opt/micromamba/envs/plugin_env/bin/python /scripts/fasttenet_for_cellcraft.py {input.expression} {input.trajectory} {input.cellSelect} {params.TF} {output.resultMatrixFDR} {output.resultMatrixFdrTrim} {output.resultMatrixFdrOutdegree} {output.resultMatrixFdrTrimOutdegree} {params.backend} {params.number_of_devices} {params.batch_size} {params.FDR} {params.number_of_outdegrees} {params.trimming_threshold} > {log.stdout} 2> {log.stderr}"
 
