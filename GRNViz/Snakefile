@@ -14,7 +14,7 @@ rule Heatmap:
         stdout="user/{user_name}/workflow_{workflow_id}/algorithm_{algorithm_id}/logs/Heatmap.stdout",
         stderr="user/{user_name}/workflow_{workflow_id}/algorithm_{algorithm_id}/logs/Heatmap.stderr"
     shell:
-        "export R_LIBS_USER=/workspace/dependency/renv/library/linux-debian-bullseye/R-4.4/x86_64-conda-linux-gnu:/opt/micromamba/envs/plugin_env/lib/R/library && export R_HOME=/opt/micromamba/envs/plugin_env/lib/R && export RENV_CONFIG_AUTOLOADER_ENABLED=FALSE && /opt/micromamba/envs/plugin_env/bin/Rscript /scripts/Pseudotime_heatmap.R {input.expression} {input.trajectory} {input.input} {output.Heatmap} {params.Top_Genes} {params.Sample_Size} > {log.stdout} 2> {log.stderr}"
+        "export R_HOME=/opt/micromamba/envs/plugin_env/lib/R && if [ -f /renv_path.sh ]; then source /renv_path.sh && export R_LIBS_USER=$RENV_LIB_PATH; else export R_LIBS_USER=$(find /workspace/dependency/renv/library -maxdepth 3 -name 'x86_64-*' -type d 2>/dev/null | head -1); [ -z "$R_LIBS_USER" ] && export R_LIBS_USER=/opt/micromamba/envs/plugin_env/lib/R/library; fi && export RENV_CONFIG_AUTOLOADER_ENABLED=FALSE && /opt/micromamba/envs/plugin_env/bin/Rscript /scripts/Pseudotime_heatmap.R {input.expression} {input.trajectory} {input.input} {output.Heatmap} {params.Top_Genes} {params.Sample_Size} > {log.stdout} 2> {log.stderr}"
 
 rule Barplot:
     input:

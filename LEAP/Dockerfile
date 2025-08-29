@@ -8,9 +8,9 @@ ENV TZ=Asia/Seoul
 
 RUN apt-get update && apt-get install -y \
     build-essential gcc g++ gfortran make \
-    libssl-dev libcurl4-openssl-dev libxml2-dev \
-    libjpeg-dev libpng-dev libfreetype6-dev libtiff-dev \
-    libx11-dev libxt-dev \
+    libssl-dev libcurl4-openssl-dev libxml2-dev libxslt1-dev \
+    libjpeg-dev libpng-dev libfreetype6-dev libtiff5-dev \
+    libx11-dev libxt-dev xorg-dev \
     libglu1-mesa-dev \
     libharfbuzz-dev libfribidi-dev \
     libglpk-dev \
@@ -18,9 +18,16 @@ RUN apt-get update && apt-get install -y \
     python3 python3-pip python3-venv \
     software-properties-common \
     gnupg ca-certificates \
-    zlib1g-dev \
+    zlib1g-dev liblzma-dev \
     libv8-dev libnode-dev \
     libudunits2-dev libgdal-dev \
+    libcairo2-dev \
+    libfontconfig1-dev \
+    libgeos-dev \
+    libproj-dev \
+    libmagick++-dev \
+    libpoppler-cpp-dev \
+    librsvg2-dev \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 COPY dependency/ /workspace/dependency/
@@ -65,6 +72,21 @@ RUN /usr/local/bin/micromamba install -y -n plugin_env \
     r-essentials \
     r-renv \
     r-jsonlite \
+    zlib \
+    xz \
+    libpng \
+    libjpeg-turbo \
+    libcurl \
+    libxml2 \
+    libxslt \
+    cairo \
+    pango \
+    harfbuzz \
+    fribidi \
+    freetype \
+    fontconfig \
+    libtiff \
+    pkg-config \
     -c conda-forge \
     -r $MAMBA_ROOT_PREFIX && \
     ln -sf $MAMBA_ROOT_PREFIX/envs/plugin_env/bin/R /usr/local/bin/R && \
@@ -82,8 +104,8 @@ RUN if [ -f "/workspace/dependency/renv.lock" ]; then \
         options(renv.config.cache.enabled = FALSE); \
         renv::init(bare = TRUE, restart = FALSE); \
         renv::restore(lockfile = '/workspace/dependency/renv.lock', confirm = FALSE);" && \
-    cp -r renv/library/*/R-*/* /opt/micromamba/envs/plugin_env/lib/R/library/ 2>/dev/null || true && \
-    echo 'R package installation completed'; \
+    echo 'R package installation completed - using original renv location' && \
+    echo "export RENV_LIB_PATH=$(find /workspace/dependency/renv/library -maxdepth 3 -name 'x86_64-*' -type d | head -1)" > /renv_path.sh; \
     fi
 
 RUN /usr/local/bin/micromamba run -n plugin_env -r $MAMBA_ROOT_PREFIX \
@@ -104,10 +126,12 @@ RUN echo '#!/bin/bash' > /entrypoint.sh && \
     echo 'export MAMBA_ROOT_PREFIX=/opt/micromamba' >> /entrypoint.sh && \
     echo 'export MAMBA_EXE=/usr/local/bin/micromamba' >> /entrypoint.sh && \
     echo 'export PATH=$MAMBA_ROOT_PREFIX/envs/plugin_env/bin:$PATH' >> /entrypoint.sh && \
-    echo '# Set R environment (Micromamba 기반)' >> /entrypoint.sh && \
     echo 'export R_HOME=/opt/micromamba/envs/plugin_env/lib/R' >> /entrypoint.sh && \
+    echo 'export R_HOME=/opt/micromamba/envs/plugin_env/lib/R' >> /entrypoint.sh && \
+    echo 'if [ -f /renv_path.sh ]; then source /renv_path.sh; export R_LIBS_USER=$RENV_LIB_PATH; else export R_LIBS_USER=/opt/micromamba/envs/plugin_env/lib/R/library; fi' >> /entrypoint.sh && \
+    echo 'if [ -f /renv_path.sh ]; then source /renv_path.sh; export R_LIBS_USER=$RENV_LIB_PATH; else export R_LIBS_USER=/opt/micromamba/envs/plugin_env/lib/R/library; fi' >> /entrypoint.sh && \
     echo 'export RENV_CONFIG_AUTOLOADER_ENABLED=FALSE' >> /entrypoint.sh && \
-    echo '# Activate micromamba environment' >> /entrypoint.sh && \
+    echo 'eval "$($MAMBA_EXE shell activate -s bash -p $MAMBA_ROOT_PREFIX plugin_env)" 2>/dev/null || true' >> /entrypoint.sh && \
     echo 'eval "$($MAMBA_EXE shell activate -s bash -p $MAMBA_ROOT_PREFIX plugin_env)" 2>/dev/null || true' >> /entrypoint.sh && \
     echo 'cd /workspace' >> /entrypoint.sh && \
     echo 'exec "$@"' >> /entrypoint.sh && \
