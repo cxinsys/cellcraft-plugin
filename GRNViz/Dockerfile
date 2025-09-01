@@ -19,6 +19,7 @@ RUN apt-get update && apt-get install -y \
     software-properties-common \
     gnupg ca-certificates \
     zlib1g-dev liblzma-dev \
+    rsync \
     libv8-dev libnode-dev \
     libudunits2-dev libgdal-dev \
     libcairo2-dev \
@@ -97,16 +98,83 @@ RUN echo 'options(repos = c(CRAN = "https://cloud.r-project.org"), download.file
     Rscript -e "install.packages(c('renv', 'BiocManager'), dependencies = TRUE)"
 
 RUN if [ -f "/workspace/dependency/renv.lock" ]; then \
-    cd /workspace/dependency && \
+    echo 'Installing R packages from renv.lock...' && \
     /usr/local/bin/micromamba run -n plugin_env -r $MAMBA_ROOT_PREFIX \
     Rscript -e "\
+        # Set micromamba environment as primary library path \
+        target_lib <- '/opt/micromamba/envs/plugin_env/lib/R/library'; \
+        .libPaths(c(target_lib, .libPaths())); \
+        cat('Library paths configured:', paste(.libPaths(), collapse=', '), '\\n'); \
+        \
+        # Change to dependency directory for renv operations \
+        setwd('/workspace/dependency'); \
+        \
+        # Load renv and configure \
         library(renv); \
         options(renv.config.cache.enabled = FALSE); \
+        options(renv.config.auto.snapshot = FALSE); \
+        \
+        # Initialize renv project \
+        cat('Initializing renv project...\\n'); \
         renv::init(bare = TRUE, restart = FALSE); \
-        renv::restore(lockfile = '/workspace/dependency/renv.lock', confirm = FALSE);" && \
-    echo 'R package installation completed - using original renv location' && \
-    echo "export RENV_LIB_PATH=$(find /workspace/dependency/renv/library -maxdepth 3 -name 'x86_64-*' -type d | head -1)" > /renv_path.sh; \
-    fi
+        \
+        # Restore packages to renv library \
+        cat('Restoring packages from renv.lock...\\n'); \
+        tryCatch({ \
+            renv::restore(lockfile = '/workspace/dependency/renv.lock', confirm = FALSE); \
+            cat('✅ R packages successfully installed to renv library\\n'); \
+        }, error = function(e) { \
+            cat('⚠️ Some packages may have failed, but continuing...\\n'); \
+            cat('Error details:', conditionMessage(e), '\\n'); \
+        }); \
+    " && \
+    echo 'renv installation phase completed' ; \
+fi
+
+RUN if [ -d "/workspace/dependency/renv/library" ]; then \
+    echo '=== Stage 1: Starting complete rsync copy ===' && \
+    RENV_LIB_PATH="/workspace/dependency/renv/library/linux-debian-bullseye/R-4.4/x86_64-conda-linux-gnu" && \
+    TARGET_LIB_PATH="/opt/micromamba/envs/plugin_env/lib/R/library" && \
+    if [ -d "$RENV_LIB_PATH" ]; then \
+        echo "Copy source: $RENV_LIB_PATH" && \
+        echo "Copy target: $TARGET_LIB_PATH" && \
+        echo "Packages to copy:" && \
+        ls -1 "$RENV_LIB_PATH" | wc -l && echo " packages" && \
+        echo "Starting rsync copy..." && \
+        rsync -av --progress "$RENV_LIB_PATH/" "$TARGET_LIB_PATH/" && \
+        echo "✅ rsync copy completed" && \
+        echo "Post-copy package verification:" && \
+        ls -1 "$TARGET_LIB_PATH" | wc -l && echo " packages" ; \
+    else \
+        echo "⚠️ Cannot find renv library path: $RENV_LIB_PATH" ; \
+    fi ; \
+else \
+    echo "⚠️ renv library directory does not exist" ;fi
+
+RUN echo '=== Stage 2: Cleanup temporary files for space optimization ===' && \
+    echo '=== Stage 2: Starting temporary file cleanup ===' && \
+    # Remove renv temporary library directory \
+    if [ -d "/workspace/dependency/renv/library" ]; then \
+        echo 'Removing renv temporary library...' && \
+        RENV_LIB_SIZE=$(du -sh /workspace/dependency/renv/library 2>/dev/null | cut -f1 || echo "unknown") && \
+        echo "renv library size to remove: $RENV_LIB_SIZE" && \
+        rm -rf /workspace/dependency/renv/library && \
+        echo '✅ renv temporary library removal completed' ; \
+    fi && \
+    # Remove renv cache \
+    if [ -d "/root/.cache/R/renv" ]; then \
+        echo 'Removing renv cache...' && \
+        CACHE_SIZE=$(du -sh /root/.cache/R/renv 2>/dev/null | cut -f1 || echo "unknown") && \
+        echo "Cache size to remove: $CACHE_SIZE" && \
+        rm -rf /root/.cache/R/renv && \
+        echo '✅ renv cache removal completed' ; \
+    fi && \
+    # Remove rsync package \
+    echo 'Removing rsync package...' && \
+    apt-get remove -y rsync && \
+    apt-get autoremove -y && \
+    echo '✅ rsync package removal completed' && \
+    echo '=== Stage 2: Temporary file cleanup completed ==='
 
 RUN /usr/local/bin/micromamba run -n plugin_env -r $MAMBA_ROOT_PREFIX \
     Rscript -e "if (!requireNamespace('optparse', quietly = TRUE)) install.packages('optparse', dependencies = TRUE)"
@@ -127,7 +195,7 @@ RUN echo '#!/bin/bash' > /entrypoint.sh && \
     echo 'export MAMBA_EXE=/usr/local/bin/micromamba' >> /entrypoint.sh && \
     echo 'export PATH=$MAMBA_ROOT_PREFIX/envs/plugin_env/bin:$PATH' >> /entrypoint.sh && \
     echo 'export R_HOME=/opt/micromamba/envs/plugin_env/lib/R' >> /entrypoint.sh && \
-    echo 'if [ -f /renv_path.sh ]; then source /renv_path.sh; export R_LIBS_USER=$RENV_LIB_PATH; else export R_LIBS_USER=/opt/micromamba/envs/plugin_env/lib/R/library; fi' >> /entrypoint.sh && \
+    echo 'export R_LIBS_USER=/opt/micromamba/envs/plugin_env/lib/R/library' >> /entrypoint.sh && \
     echo 'export RENV_CONFIG_AUTOLOADER_ENABLED=FALSE' >> /entrypoint.sh && \
     echo 'eval "$($MAMBA_EXE shell activate -s bash -p $MAMBA_ROOT_PREFIX plugin_env)" 2>/dev/null || true' >> /entrypoint.sh && \
     echo 'cd /workspace' >> /entrypoint.sh && \
