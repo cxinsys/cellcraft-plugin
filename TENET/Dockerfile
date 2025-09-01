@@ -8,8 +8,8 @@ ENV TZ=Asia/Seoul
 
 RUN apt-get update && apt-get install -y \
     build-essential gcc g++ gfortran make \
-    libssl-dev libcurl4-openssl-dev libxml2-dev \
-    libjpeg-dev libpng-dev libfreetype6-dev libtiff-dev \
+    libssl-dev libcurl4-openssl-dev libxml2-dev libxslt1-dev \
+    libjpeg-dev libpng-dev libfreetype6-dev libtiff5-dev \
     libx11-dev libxt-dev \
     libglu1-mesa-dev \
     libharfbuzz-dev libfribidi-dev \
@@ -19,15 +19,7 @@ RUN apt-get update && apt-get install -y \
     software-properties-common \
     gnupg ca-certificates \
     zlib1g-dev \
-    default-jdk \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
-
-# Java 환경변수 설정
-ENV JAVA_HOME=/usr/lib/jvm/default-java
-ENV PATH=$JAVA_HOME/bin:$PATH
-
-# Java 버전 확인
-RUN java -version && javac -version
 
 COPY dependency/ /workspace/dependency/
 
@@ -78,7 +70,6 @@ RUN echo '#!/bin/bash' > /entrypoint.sh && \
     echo 'export MAMBA_ROOT_PREFIX=/opt/micromamba' >> /entrypoint.sh && \
     echo 'export MAMBA_EXE=/usr/local/bin/micromamba' >> /entrypoint.sh && \
     echo 'export PATH=$MAMBA_ROOT_PREFIX/envs/plugin_env/bin:$PATH' >> /entrypoint.sh && \
-    echo '# Activate micromamba environment' >> /entrypoint.sh && \
     echo 'eval "$($MAMBA_EXE shell activate -s bash -p $MAMBA_ROOT_PREFIX plugin_env)" 2>/dev/null || true' >> /entrypoint.sh && \
     echo 'cd /workspace' >> /entrypoint.sh && \
     echo 'exec "$@"' >> /entrypoint.sh && \
