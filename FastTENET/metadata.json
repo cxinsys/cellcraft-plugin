@@ -248,7 +248,7 @@
                                 {
                                     "name": "number of devices",
                                     "type": "int",
-                                    "defaultValue": "4",
+                                    "defaultValue": "1",
                                     "min": 1,
                                     "max": null,
                                     "fileExtension": "",
@@ -526,7 +526,7 @@
                 {
                     "name": "number of devices",
                     "type": "int",
-                    "defaultValue": "4",
+                    "defaultValue": "1",
                     "min": 1,
                     "max": null,
                     "fileExtension": ""

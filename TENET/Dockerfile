@@ -19,7 +19,11 @@ RUN apt-get update && apt-get install -y \
     software-properties-common \
     gnupg ca-certificates \
     zlib1g-dev \
+    default-jdk-headless \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+ENV JAVA_HOME=/usr/lib/jvm/default-java
+ENV PATH=$JAVA_HOME/bin:$PATH
 
 COPY dependency/ /workspace/dependency/
 

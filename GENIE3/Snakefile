@@ -10,7 +10,6 @@ rule TENET_Input:
     params:
         geneList=lambda wildcards: "user/{user_name}/data/{geneList.txt}" if os.path.exists("user/{user_name}/data/{geneList.txt}") else "None",
         UMAP_lasso=lambda wildcards: {UMAP lasso} if os.path.exists({UMAP lasso}) else "None",
-        UMAP_lasso=lambda wildcards: {UMAP lasso} if os.path.exists({UMAP lasso}) else "None",
         cell_group={cell group},
         pseudotime={pseudotime},
         clusters=lambda wc: ";".join({clusters})
