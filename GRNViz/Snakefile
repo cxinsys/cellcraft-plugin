@@ -6,7 +6,7 @@ rule Heatmap:
         trajectory="user/{user_name}/workflow_{workflow_id}/algorithm_{algorithm_id}/results/{trajectory.txt}",
         input="user/{user_name}/workflow_{workflow_id}/algorithm_{algorithm_id}/results/{input.txt}"
     output:
-        Heatmap="user/{user_name}/workflow_{workflow_id}/visualization_{visualization_id}/results/Heatmap.json"
+        Heatmap="user/{user_name}/workflow_{workflow_id}/visualization_{visualization_id}/results/{result_filename}"
     params:
         Top_Genes={Top Genes},
         Sample_Size={Sample Size}
@@ -20,7 +20,7 @@ rule Barplot:
     input:
         input="user/{user_name}/workflow_{workflow_id}/algorithm_{algorithm_id}/results/{input.txt}"
     output:
-        Barplot="user/{user_name}/workflow_{workflow_id}/visualization_{visualization_id}/results/Barplot.json"
+        Barplot="user/{user_name}/workflow_{workflow_id}/visualization_{visualization_id}/results/{result_filename}"
     params:
         Top_Genes={Top Genes}
     log:
@@ -33,7 +33,7 @@ rule Network:
     input:
         input="user/{user_name}/workflow_{workflow_id}/algorithm_{algorithm_id}/results/{input.txt}"
     output:
-        Network="user/{user_name}/workflow_{workflow_id}/visualization_{visualization_id}/results/Network.json"
+        Network="user/{user_name}/workflow_{workflow_id}/visualization_{visualization_id}/results/{result_filename}"
     params:
         Top_Genes={Top Genes}
     log:
@@ -41,4 +41,3 @@ rule Network:
         stderr="user/{user_name}/workflow_{workflow_id}/visualization_{visualization_id}/logs/Network.stderr"
     shell:
         "/opt/micromamba/envs/plugin_env/bin/python /scripts/NetworkX.py {input.input} {output.Network} {params.Top_Genes} > {log.stdout} 2> {log.stderr}"
-
