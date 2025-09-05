@@ -49,15 +49,6 @@
                                     "fileExtension": ""
                                 },
                                 {
-                                    "id": "param_1755337353455_bs590wl91",
-                                    "max": null,
-                                    "min": null,
-                                    "name": "UMAP lasso",
-                                    "type": "h5adParameter",
-                                    "defaultValue": "",
-                                    "fileExtension": ""
-                                },
-                                {
                                     "id": "param_1755337359795_srxgnqah6",
                                     "max": null,
                                     "min": null,
