@@ -1,0 +1,364 @@
+{
+    "name": "GRNViz",
+    "author": "admin",
+    "description": "An integrated visualization toolkit for multi-dimensional exploration of gene regulatory networks from ranking to dynamics",
+    "drawflow": {
+        "drawflow": {
+            "Home": {
+                "data": {
+                    "1": {
+                        "id": 1,
+                        "name": "ruleNode",
+                        "data": {
+                            "title": "Heatmap",
+                            "inputs": [
+                                "expression.csv",
+                                "trajectory.txt",
+                                "input.txt"
+                            ],
+                            "outputs": [
+                                "Heatmap.json"
+                            ],
+                            "script": {},
+                            "parameters": [
+                                {
+                                    "name": "expression",
+                                    "type": "inputFile",
+                                    "defaultValue": "expression.csv",
+                                    "min": null,
+                                    "max": null,
+                                    "fileExtension": ".csv",
+                                    "id": "param_1755349747484_xg75novgu"
+                                },
+                                {
+                                    "name": "trajectory",
+                                    "type": "inputFile",
+                                    "defaultValue": "trajectory.txt",
+                                    "min": null,
+                                    "max": null,
+                                    "fileExtension": ".txt",
+                                    "id": "param_1755349757624_x5emjg2k8"
+                                },
+                                {
+                                    "name": "input",
+                                    "type": "inputFile",
+                                    "defaultValue": "input.txt",
+                                    "min": null,
+                                    "max": null,
+                                    "fileExtension": ".txt",
+                                    "id": "param_1755349834336_3k4xe10aq"
+                                },
+                                {
+                                    "name": "Heatmap",
+                                    "type": "outputFile",
+                                    "defaultValue": "Heatmap.json",
+                                    "min": null,
+                                    "max": null,
+                                    "fileExtension": ".json",
+                                    "id": "param_1755349839180_gvuy188ec"
+                                },
+                                {
+                                    "name": "Top Genes",
+                                    "type": "int",
+                                    "defaultValue": "10",
+                                    "min": 5,
+                                    "max": null,
+                                    "fileExtension": "",
+                                    "id": "param_1755349851842_c1o4jrzzb"
+                                },
+                                {
+                                    "name": "Sample Size",
+                                    "type": "int",
+                                    "defaultValue": "100",
+                                    "min": 50,
+                                    "max": null,
+                                    "fileExtension": "",
+                                    "id": "param_1755349867417_kc737y4oq"
+                                }
+                            ]
+                        },
+                        "class": "ruleNode",
+                        "html": "ruleNode",
+                        "typenode": "vue",
+                        "inputs": {
+                            "input_1": {
+                                "connections": []
+                            },
+                            "input_2": {
+                                "connections": []
+                            },
+                            "input_3": {
+                                "connections": []
+                            }
+                        },
+                        "outputs": {
+                            "output_1": {
+                                "connections": []
+                            }
+                        },
+                        "pos_x": 168,
+                        "pos_y": 107
+                    },
+                    "2": {
+                        "id": 2,
+                        "name": "ruleNode",
+                        "data": {
+                            "title": "Barplot",
+                            "inputs": [
+                                "input.txt"
+                            ],
+                            "outputs": [
+                                "Barplot.json"
+                            ],
+                            "script": {},
+                            "parameters": [
+                                {
+                                    "name": "input",
+                                    "type": "inputFile",
+                                    "defaultValue": "input.txt",
+                                    "min": null,
+                                    "max": null,
+                                    "fileExtension": ".txt",
+                                    "id": "param_1755349900444_44jga499q"
+                                },
+                                {
+                                    "name": "Barplot",
+                                    "type": "outputFile",
+                                    "defaultValue": "Barplot.json",
+                                    "min": null,
+                                    "max": null,
+                                    "fileExtension": ".json",
+                                    "id": "param_1755349921769_vvtvjrw2n"
+                                },
+                                {
+                                    "name": "Top Genes",
+                                    "type": "int",
+                                    "defaultValue": "10",
+                                    "min": 5,
+                                    "max": null,
+                                    "fileExtension": "",
+                                    "id": "param_1755349932082_fygsmikdm"
+                                }
+                            ]
+                        },
+                        "class": "ruleNode",
+                        "html": "ruleNode",
+                        "typenode": "vue",
+                        "inputs": {
+                            "input_1": {
+                                "connections": []
+                            }
+                        },
+                        "outputs": {
+                            "output_1": {
+                                "connections": []
+                            }
+                        },
+                        "pos_x": 259,
+                        "pos_y": 256
+                    },
+                    "3": {
+                        "id": 3,
+                        "name": "ruleNode",
+                        "data": {
+                            "title": "Network",
+                            "inputs": [
+                                "input.txt"
+                            ],
+                            "outputs": [
+                                "Network.json"
+                            ],
+                            "script": {},
+                            "parameters": [
+                                {
+                                    "name": "input",
+                                    "type": "inputFile",
+                                    "defaultValue": "input.txt",
+                                    "min": null,
+                                    "max": null,
+                                    "fileExtension": ".txt",
+                                    "id": "param_1755349953493_gsjgtl7xe"
+                                },
+                                {
+                                    "name": "Network",
+                                    "type": "outputFile",
+                                    "defaultValue": "Network.json",
+                                    "min": null,
+                                    "max": null,
+                                    "fileExtension": ".json",
+                                    "id": "param_1755349971815_rm52t96wh"
+                                },
+                                {
+                                    "name": "Top Genes",
+                                    "type": "int",
+                                    "defaultValue": "50",
+                                    "min": 10,
+                                    "max": null,
+                                    "fileExtension": "",
+                                    "id": "param_1755349991792_mq2clqj9v"
+                                }
+                            ]
+                        },
+                        "class": "ruleNode",
+                        "html": "ruleNode",
+                        "typenode": "vue",
+                        "inputs": {
+                            "input_1": {
+                                "connections": []
+                            }
+                        },
+                        "outputs": {
+                            "output_1": {
+                                "connections": []
+                            }
+                        },
+                        "pos_x": 468,
+                        "pos_y": 384
+                    }
+                }
+            }
+        }
+    },
+    "rules": {
+        "0": {
+            "name": "Heatmap",
+            "input": [
+                "expression.csv",
+                "trajectory.txt",
+                "input.txt"
+            ],
+            "output": [
+                "Heatmap.json"
+            ],
+            "script": "Pseudotime_heatmap.R",
+            "parameters": [
+                {
+                    "name": "expression",
+                    "type": "inputFile",
+                    "defaultValue": "expression.csv",
+                    "min": null,
+                    "max": null,
+                    "fileExtension": ".csv"
+                },
+                {
+                    "name": "trajectory",
+                    "type": "inputFile",
+                    "defaultValue": "trajectory.txt",
+                    "min": null,
+                    "max": null,
+                    "fileExtension": ".txt"
+                },
+                {
+                    "name": "input",
+                    "type": "inputFile",
+                    "defaultValue": "input.txt",
+                    "min": null,
+                    "max": null,
+                    "fileExtension": ".txt"
+                },
+                {
+                    "name": "Heatmap",
+                    "type": "outputFile",
+                    "defaultValue": "Heatmap.json",
+                    "min": null,
+                    "max": null,
+                    "fileExtension": ".json"
+                },
+                {
+                    "name": "Top Genes",
+                    "type": "int",
+                    "defaultValue": "10",
+                    "min": 5,
+                    "max": null,
+                    "fileExtension": ""
+                },
+                {
+                    "name": "Sample Size",
+                    "type": "int",
+                    "defaultValue": "100",
+                    "min": 50,
+                    "max": null,
+                    "fileExtension": ""
+                }
+            ],
+            "nodeId": 1,
+            "isVisualization": false
+        },
+        "1": {
+            "name": "Barplot",
+            "input": [
+                "input.txt"
+            ],
+            "output": [
+                "Barplot.json"
+            ],
+            "script": "Barplot.py",
+            "parameters": [
+                {
+                    "name": "input",
+                    "type": "inputFile",
+                    "defaultValue": "input.txt",
+                    "min": null,
+                    "max": null,
+                    "fileExtension": ".txt"
+                },
+                {
+                    "name": "Barplot",
+                    "type": "outputFile",
+                    "defaultValue": "Barplot.json",
+                    "min": null,
+                    "max": null,
+                    "fileExtension": ".json"
+                },
+                {
+                    "name": "Top Genes",
+                    "type": "int",
+                    "defaultValue": "10",
+                    "min": 5,
+                    "max": null,
+                    "fileExtension": ""
+                }
+            ],
+            "nodeId": 2,
+            "isVisualization": false
+        },
+        "2": {
+            "name": "Network",
+            "input": [
+                "input.txt"
+            ],
+            "output": [
+                "Network.json"
+            ],
+            "script": "NetworkX.py",
+            "parameters": [
+                {
+                    "name": "input",
+                    "type": "inputFile",
+                    "defaultValue": "input.txt",
+                    "min": null,
+                    "max": null,
+                    "fileExtension": ".txt"
+                },
+                {
+                    "name": "Network",
+                    "type": "outputFile",
+                    "defaultValue": "Network.json",
+                    "min": null,
+                    "max": null,
+                    "fileExtension": ".json"
+                },
+                {
+                    "name": "Top Genes",
+                    "type": "int",
+                    "defaultValue": "50",
+                    "min": 10,
+                    "max": null,
+                    "fileExtension": ""
+                }
+            ],
+            "nodeId": 3,
+            "isVisualization": false
+        }
+    }
+}
