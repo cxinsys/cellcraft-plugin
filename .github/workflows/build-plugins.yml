@@ -1,0 +1,609 @@
+name: Build and Push Plugin Images
+
+on:
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: 'Image tag version (e.g., 1.0.1) - leave empty for latest only'
+        required: false
+        default: ''
+      # GPU Plugins (AMD64 only)
+      build_fasttenet:
+        description: 'Build FastTENET (GPU, amd64 only)'
+        type: boolean
+        default: true
+      build_fastscode:
+        description: 'Build FastSCODE (GPU, amd64 only)'
+        type: boolean
+        default: true
+      # CPU Plugins (Multi-platform)
+      build_tenet:
+        description: 'Build TENET (CPU)'
+        type: boolean
+        default: true
+      build_scribe:
+        description: 'Build Scribe (CPU)'
+        type: boolean
+        default: true
+      build_leap:
+        description: 'Build LEAP (CPU)'
+        type: boolean
+        default: true
+      build_grnboost2:
+        description: 'Build GRNBOOST2 (CPU)'
+        type: boolean
+        default: true
+      build_genie3:
+        description: 'Build GENIE3 (CPU)'
+        type: boolean
+        default: true
+      build_grnviz:
+        description: 'Build GRNViz (CPU)'
+        type: boolean
+        default: true
+      no_cache:
+        description: 'Build without cache'
+        type: boolean
+        default: false
+
+  push:
+    tags:
+      - 'v*.*.*'
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_PREFIX: ghcr.io/cxinsys/cellcraft
+
+jobs:
+  # GPU Plugin: FastTENET
+  build-fasttenet:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' || github.event.inputs.build_fasttenet == 'true'
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Determine version and tags
+        id: version
+        run: |
+          INPUT_TAG="${{ github.event.inputs.image_tag }}"
+
+          if [[ -n "$INPUT_TAG" ]]; then
+            VERSION="$INPUT_TAG"
+          elif [[ "${{ github.ref }}" == refs/tags/* ]]; then
+            VERSION="${GITHUB_REF#refs/tags/v}"
+          else
+            VERSION="latest"
+          fi
+
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+          IMAGE_NAME="${{ env.IMAGE_PREFIX }}-fasttenet"
+
+          if [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            MAJOR=$(echo $VERSION | cut -d. -f1)
+            MINOR=$(echo $VERSION | cut -d. -f1-2)
+            echo "tags=${IMAGE_NAME}:${VERSION},${IMAGE_NAME}:${MINOR},${IMAGE_NAME}:${MAJOR},${IMAGE_NAME}:latest" >> $GITHUB_OUTPUT
+          elif [[ "$VERSION" == "latest" ]]; then
+            echo "tags=${IMAGE_NAME}:latest" >> $GITHUB_OUTPUT
+          else
+            echo "tags=${IMAGE_NAME}:${VERSION},${IMAGE_NAME}:latest" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Build and push FastTENET
+        uses: docker/build-push-action@v5
+        with:
+          context: ./FastTENET
+          platforms: linux/amd64
+          push: true
+          tags: ${{ steps.version.outputs.tags }}
+          no-cache: ${{ github.event.inputs.no_cache == 'true' }}
+          cache-from: type=gha,scope=fasttenet
+          cache-to: type=gha,mode=max,scope=fasttenet
+
+  # GPU Plugin: FastSCODE
+  build-fastscode:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' || github.event.inputs.build_fastscode == 'true'
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Determine version and tags
+        id: version
+        run: |
+          INPUT_TAG="${{ github.event.inputs.image_tag }}"
+
+          if [[ -n "$INPUT_TAG" ]]; then
+            VERSION="$INPUT_TAG"
+          elif [[ "${{ github.ref }}" == refs/tags/* ]]; then
+            VERSION="${GITHUB_REF#refs/tags/v}"
+          else
+            VERSION="latest"
+          fi
+
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+          IMAGE_NAME="${{ env.IMAGE_PREFIX }}-fastscode"
+
+          if [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            MAJOR=$(echo $VERSION | cut -d. -f1)
+            MINOR=$(echo $VERSION | cut -d. -f1-2)
+            echo "tags=${IMAGE_NAME}:${VERSION},${IMAGE_NAME}:${MINOR},${IMAGE_NAME}:${MAJOR},${IMAGE_NAME}:latest" >> $GITHUB_OUTPUT
+          elif [[ "$VERSION" == "latest" ]]; then
+            echo "tags=${IMAGE_NAME}:latest" >> $GITHUB_OUTPUT
+          else
+            echo "tags=${IMAGE_NAME}:${VERSION},${IMAGE_NAME}:latest" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Build and push FastSCODE
+        uses: docker/build-push-action@v5
+        with:
+          context: ./FastSCODE
+          platforms: linux/amd64
+          push: true
+          tags: ${{ steps.version.outputs.tags }}
+          no-cache: ${{ github.event.inputs.no_cache == 'true' }}
+          cache-from: type=gha,scope=fastscode
+          cache-to: type=gha,mode=max,scope=fastscode
+
+  # CPU Plugin: TENET
+  build-tenet:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' || github.event.inputs.build_tenet == 'true'
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Determine version and tags
+        id: version
+        run: |
+          INPUT_TAG="${{ github.event.inputs.image_tag }}"
+
+          if [[ -n "$INPUT_TAG" ]]; then
+            VERSION="$INPUT_TAG"
+          elif [[ "${{ github.ref }}" == refs/tags/* ]]; then
+            VERSION="${GITHUB_REF#refs/tags/v}"
+          else
+            VERSION="latest"
+          fi
+
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+          IMAGE_NAME="${{ env.IMAGE_PREFIX }}-tenet"
+
+          if [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            MAJOR=$(echo $VERSION | cut -d. -f1)
+            MINOR=$(echo $VERSION | cut -d. -f1-2)
+            echo "tags=${IMAGE_NAME}:${VERSION},${IMAGE_NAME}:${MINOR},${IMAGE_NAME}:${MAJOR},${IMAGE_NAME}:latest" >> $GITHUB_OUTPUT
+          elif [[ "$VERSION" == "latest" ]]; then
+            echo "tags=${IMAGE_NAME}:latest" >> $GITHUB_OUTPUT
+          else
+            echo "tags=${IMAGE_NAME}:${VERSION},${IMAGE_NAME}:latest" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Build and push TENET
+        uses: docker/build-push-action@v5
+        with:
+          context: ./TENET
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.version.outputs.tags }}
+          no-cache: ${{ github.event.inputs.no_cache == 'true' }}
+          cache-from: type=gha,scope=tenet
+          cache-to: type=gha,mode=max,scope=tenet
+
+  # CPU Plugin: Scribe
+  build-scribe:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' || github.event.inputs.build_scribe == 'true'
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Determine version and tags
+        id: version
+        run: |
+          INPUT_TAG="${{ github.event.inputs.image_tag }}"
+
+          if [[ -n "$INPUT_TAG" ]]; then
+            VERSION="$INPUT_TAG"
+          elif [[ "${{ github.ref }}" == refs/tags/* ]]; then
+            VERSION="${GITHUB_REF#refs/tags/v}"
+          else
+            VERSION="latest"
+          fi
+
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+          IMAGE_NAME="${{ env.IMAGE_PREFIX }}-scribe"
+
+          if [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            MAJOR=$(echo $VERSION | cut -d. -f1)
+            MINOR=$(echo $VERSION | cut -d. -f1-2)
+            echo "tags=${IMAGE_NAME}:${VERSION},${IMAGE_NAME}:${MINOR},${IMAGE_NAME}:${MAJOR},${IMAGE_NAME}:latest" >> $GITHUB_OUTPUT
+          elif [[ "$VERSION" == "latest" ]]; then
+            echo "tags=${IMAGE_NAME}:latest" >> $GITHUB_OUTPUT
+          else
+            echo "tags=${IMAGE_NAME}:${VERSION},${IMAGE_NAME}:latest" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Build and push Scribe
+        uses: docker/build-push-action@v5
+        with:
+          context: ./Scribe
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.version.outputs.tags }}
+          no-cache: ${{ github.event.inputs.no_cache == 'true' }}
+          cache-from: type=gha,scope=scribe
+          cache-to: type=gha,mode=max,scope=scribe
+
+  # CPU Plugin: LEAP
+  build-leap:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' || github.event.inputs.build_leap == 'true'
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Determine version and tags
+        id: version
+        run: |
+          INPUT_TAG="${{ github.event.inputs.image_tag }}"
+
+          if [[ -n "$INPUT_TAG" ]]; then
+            VERSION="$INPUT_TAG"
+          elif [[ "${{ github.ref }}" == refs/tags/* ]]; then
+            VERSION="${GITHUB_REF#refs/tags/v}"
+          else
+            VERSION="latest"
+          fi
+
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+          IMAGE_NAME="${{ env.IMAGE_PREFIX }}-leap"
+
+          if [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            MAJOR=$(echo $VERSION | cut -d. -f1)
+            MINOR=$(echo $VERSION | cut -d. -f1-2)
+            echo "tags=${IMAGE_NAME}:${VERSION},${IMAGE_NAME}:${MINOR},${IMAGE_NAME}:${MAJOR},${IMAGE_NAME}:latest" >> $GITHUB_OUTPUT
+          elif [[ "$VERSION" == "latest" ]]; then
+            echo "tags=${IMAGE_NAME}:latest" >> $GITHUB_OUTPUT
+          else
+            echo "tags=${IMAGE_NAME}:${VERSION},${IMAGE_NAME}:latest" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Build and push LEAP
+        uses: docker/build-push-action@v5
+        with:
+          context: ./LEAP
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.version.outputs.tags }}
+          no-cache: ${{ github.event.inputs.no_cache == 'true' }}
+          cache-from: type=gha,scope=leap
+          cache-to: type=gha,mode=max,scope=leap
+
+  # CPU Plugin: GRNBOOST2
+  build-grnboost2:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' || github.event.inputs.build_grnboost2 == 'true'
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Determine version and tags
+        id: version
+        run: |
+          INPUT_TAG="${{ github.event.inputs.image_tag }}"
+
+          if [[ -n "$INPUT_TAG" ]]; then
+            VERSION="$INPUT_TAG"
+          elif [[ "${{ github.ref }}" == refs/tags/* ]]; then
+            VERSION="${GITHUB_REF#refs/tags/v}"
+          else
+            VERSION="latest"
+          fi
+
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+          IMAGE_NAME="${{ env.IMAGE_PREFIX }}-grnboost2"
+
+          if [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            MAJOR=$(echo $VERSION | cut -d. -f1)
+            MINOR=$(echo $VERSION | cut -d. -f1-2)
+            echo "tags=${IMAGE_NAME}:${VERSION},${IMAGE_NAME}:${MINOR},${IMAGE_NAME}:${MAJOR},${IMAGE_NAME}:latest" >> $GITHUB_OUTPUT
+          elif [[ "$VERSION" == "latest" ]]; then
+            echo "tags=${IMAGE_NAME}:latest" >> $GITHUB_OUTPUT
+          else
+            echo "tags=${IMAGE_NAME}:${VERSION},${IMAGE_NAME}:latest" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Build and push GRNBOOST2
+        uses: docker/build-push-action@v5
+        with:
+          context: ./GRNBOOST2
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.version.outputs.tags }}
+          no-cache: ${{ github.event.inputs.no_cache == 'true' }}
+          cache-from: type=gha,scope=grnboost2
+          cache-to: type=gha,mode=max,scope=grnboost2
+
+  # CPU Plugin: GENIE3
+  build-genie3:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' || github.event.inputs.build_genie3 == 'true'
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Determine version and tags
+        id: version
+        run: |
+          INPUT_TAG="${{ github.event.inputs.image_tag }}"
+
+          if [[ -n "$INPUT_TAG" ]]; then
+            VERSION="$INPUT_TAG"
+          elif [[ "${{ github.ref }}" == refs/tags/* ]]; then
+            VERSION="${GITHUB_REF#refs/tags/v}"
+          else
+            VERSION="latest"
+          fi
+
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+          IMAGE_NAME="${{ env.IMAGE_PREFIX }}-genie3"
+
+          if [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            MAJOR=$(echo $VERSION | cut -d. -f1)
+            MINOR=$(echo $VERSION | cut -d. -f1-2)
+            echo "tags=${IMAGE_NAME}:${VERSION},${IMAGE_NAME}:${MINOR},${IMAGE_NAME}:${MAJOR},${IMAGE_NAME}:latest" >> $GITHUB_OUTPUT
+          elif [[ "$VERSION" == "latest" ]]; then
+            echo "tags=${IMAGE_NAME}:latest" >> $GITHUB_OUTPUT
+          else
+            echo "tags=${IMAGE_NAME}:${VERSION},${IMAGE_NAME}:latest" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Build and push GENIE3
+        uses: docker/build-push-action@v5
+        with:
+          context: ./GENIE3
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.version.outputs.tags }}
+          no-cache: ${{ github.event.inputs.no_cache == 'true' }}
+          cache-from: type=gha,scope=genie3
+          cache-to: type=gha,mode=max,scope=genie3
+
+  # CPU Plugin: GRNViz
+  build-grnviz:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' || github.event.inputs.build_grnviz == 'true'
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Determine version and tags
+        id: version
+        run: |
+          INPUT_TAG="${{ github.event.inputs.image_tag }}"
+
+          if [[ -n "$INPUT_TAG" ]]; then
+            VERSION="$INPUT_TAG"
+          elif [[ "${{ github.ref }}" == refs/tags/* ]]; then
+            VERSION="${GITHUB_REF#refs/tags/v}"
+          else
+            VERSION="latest"
+          fi
+
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+          IMAGE_NAME="${{ env.IMAGE_PREFIX }}-grnviz"
+
+          if [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            MAJOR=$(echo $VERSION | cut -d. -f1)
+            MINOR=$(echo $VERSION | cut -d. -f1-2)
+            echo "tags=${IMAGE_NAME}:${VERSION},${IMAGE_NAME}:${MINOR},${IMAGE_NAME}:${MAJOR},${IMAGE_NAME}:latest" >> $GITHUB_OUTPUT
+          elif [[ "$VERSION" == "latest" ]]; then
+            echo "tags=${IMAGE_NAME}:latest" >> $GITHUB_OUTPUT
+          else
+            echo "tags=${IMAGE_NAME}:${VERSION},${IMAGE_NAME}:latest" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Build and push GRNViz
+        uses: docker/build-push-action@v5
+        with:
+          context: ./GRNViz
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.version.outputs.tags }}
+          no-cache: ${{ github.event.inputs.no_cache == 'true' }}
+          cache-from: type=gha,scope=grnviz
+          cache-to: type=gha,mode=max,scope=grnviz
+
+  # Update version.json on tag push
+  update-version:
+    needs: [build-fasttenet, build-fastscode, build-tenet, build-scribe, build-leap, build-grnboost2, build-genie3, build-grnviz]
+    runs-on: ubuntu-latest
+    if: always() && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/') && !contains(needs.*.result, 'failure')
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Update version.json
+        run: |
+          VERSION="${GITHUB_REF#refs/tags/v}"
+          jq --arg v "$VERSION" \
+             --arg t "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+             --arg c "${{ github.sha }}" \
+             --arg b "${{ github.ref_name }}" \
+             '.version = $v | .build_time = $t | .commit = $c | .branch = $b' \
+             version.json > version.tmp && mv version.tmp version.json
+
+      - name: Commit version update
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: update version.json to ${{ github.ref_name }}"
+          file_pattern: version.json
+          branch: main
+
+  # Build summary
+  summary:
+    needs: [build-fasttenet, build-fastscode, build-tenet, build-scribe, build-leap, build-grnboost2, build-genie3, build-grnviz]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Build Summary
+        run: |
+          echo "### CellCraft Plugins Build Summary :rocket:" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Item | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| **Trigger** | ${{ github.event_name }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Version** | ${{ github.event.inputs.image_tag || 'latest' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Commit** | \`${GITHUB_SHA::7}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| **Cache** | ${{ github.event.inputs.no_cache == 'true' && 'Disabled' || 'Enabled' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "#### :video_game: GPU Plugins (linux/amd64)" >> $GITHUB_STEP_SUMMARY
+          echo "| Plugin | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| FastTENET | ${{ needs.build-fasttenet.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| FastSCODE | ${{ needs.build-fastscode.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "#### :package: CPU Plugins (linux/amd64, linux/arm64)" >> $GITHUB_STEP_SUMMARY
+          echo "| Plugin | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| TENET | ${{ needs.build-tenet.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Scribe | ${{ needs.build-scribe.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| LEAP | ${{ needs.build-leap.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| GRNBOOST2 | ${{ needs.build-grnboost2.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| GENIE3 | ${{ needs.build-genie3.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| GRNViz | ${{ needs.build-grnviz.result }} |" >> $GITHUB_STEP_SUMMARY
