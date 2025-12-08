@@ -5,7 +5,7 @@
   "commit": "0c9507b8c7205b71b4e94144fdeeb276465ba378",
   "plugins": [
     "GENIE3",
-    "GRNBOOST2",
+    "GRNBoost2",
     "GRNViz",
     "LEAP",
     "Scribe",
