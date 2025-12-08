@@ -1,11 +1,9 @@
 {
-  "branch": "release/plugins-v1.0",
-  "version": "1.0",
+  "branch": "release/plugins-v1.0-cpu",
+  "version": "1.0-cpu",
   "build_time": "2025-09-11T14:03:00+09:00",
   "commit": "0c9507b8c7205b71b4e94144fdeeb276465ba378",
   "plugins": [
-    "FastSCODE",
-    "FastTENET",
     "GENIE3",
     "GRNBOOST2",
     "GRNViz",
