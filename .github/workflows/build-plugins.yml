@@ -30,7 +30,7 @@ on:
         type: boolean
         default: true
       build_grnboost2:
-        description: 'Build GRNBOOST2 (CPU)'
+        description: 'Build GRNBoost2 (CPU)'
         type: boolean
         default: true
       build_genie3:
@@ -359,7 +359,7 @@ jobs:
           cache-from: type=gha,scope=leap
           cache-to: type=gha,mode=max,scope=leap
 
-  # CPU Plugin: GRNBOOST2
+  # CPU Plugin: GRNBoost2
   build-grnboost2:
     runs-on: ubuntu-latest
     if: github.event_name == 'push' || github.event.inputs.build_grnboost2 == 'true'
@@ -410,10 +410,10 @@ jobs:
             echo "tags=${IMAGE_NAME}:${VERSION},${IMAGE_NAME}:latest" >> $GITHUB_OUTPUT
           fi
 
-      - name: Build and push GRNBOOST2
+      - name: Build and push GRNBoost2
         uses: docker/build-push-action@v5
         with:
-          context: ./GRNBOOST2
+          context: ./GRNBoost2
           platforms: linux/amd64,linux/arm64
           push: true
           tags: ${{ steps.version.outputs.tags }}
@@ -604,6 +604,6 @@ jobs:
           echo "| TENET | ${{ needs.build-tenet.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Scribe | ${{ needs.build-scribe.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| LEAP | ${{ needs.build-leap.result }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| GRNBOOST2 | ${{ needs.build-grnboost2.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| GRNBoost2 | ${{ needs.build-grnboost2.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| GENIE3 | ${{ needs.build-genie3.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| GRNViz | ${{ needs.build-grnviz.result }} |" >> $GITHUB_STEP_SUMMARY
