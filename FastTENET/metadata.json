@@ -1,113 +1,106 @@
 {
     "name": "FastTENET",
-    "author": "admin",
-    "description": "FastTENET is an accelerated TENET algorithm based on manycore computing",
+    "author": "test99",
+    "description": "FastTENET is an accelerated TENET algorithm based on manycore computing.",
     "drawflow": {
         "drawflow": {
             "Home": {
                 "data": {
                     "1": {
                         "id": 1,
-                        "name": "ruleNode",
                         "data": {
                             "title": "TENET Input",
                             "inputs": [
                                 "input.h5ad",
                                 "geneList.txt"
                             ],
+                            "script": {},
                             "outputs": [
                                 "expression.csv",
                                 "trajectory.txt",
                                 "cellSelect.txt"
                             ],
-                            "script": {},
                             "parameters": [
                                 {
+                                    "max": null,
+                                    "min": null,
                                     "name": "input",
                                     "type": "inputFile",
                                     "defaultValue": "input.h5ad",
-                                    "min": null,
-                                    "max": null,
-                                    "fileExtension": ".h5ad",
-                                    "id": "param_1755170460568_p3nqizvit"
+                                    "fileExtension": ".h5ad"
                                 },
                                 {
+                                    "max": null,
+                                    "min": null,
                                     "name": "geneList",
                                     "type": "optionalInputFile",
                                     "defaultValue": "geneList.txt",
-                                    "min": null,
-                                    "max": null,
-                                    "fileExtension": ".txt",
-                                    "id": "param_1755170469548_y6bz4hq7n"
+                                    "fileExtension": ".txt"
                                 },
                                 {
-                                    "name": "UMAP lasso",
-                                    "type": "h5adParameter",
+                                    "max": null,
+                                    "min": null,
+                                    "name": "ScatterPlot",
+                                    "type": "string",
                                     "defaultValue": "",
-                                    "min": null,
-                                    "max": null,
-                                    "fileExtension": "",
-                                    "id": "param_1755170477496_pofodwepc"
+                                    "fileExtension": ""
                                 },
                                 {
+                                    "max": null,
+                                    "min": null,
                                     "name": "expression",
                                     "type": "outputFile",
                                     "defaultValue": "expression.csv",
-                                    "min": null,
-                                    "max": null,
-                                    "fileExtension": ".csv",
-                                    "id": "param_1755170488500_hw9ykv5w0"
+                                    "fileExtension": ".csv"
                                 },
                                 {
+                                    "max": null,
+                                    "min": null,
                                     "name": "trajectory",
                                     "type": "outputFile",
                                     "defaultValue": "trajectory.txt",
-                                    "min": null,
-                                    "max": null,
-                                    "fileExtension": ".txt",
-                                    "id": "param_1755170499762_4s9xekg23"
+                                    "fileExtension": ".txt"
                                 },
                                 {
+                                    "max": null,
+                                    "min": null,
                                     "name": "cellSelect",
                                     "type": "outputFile",
                                     "defaultValue": "cellSelect.txt",
-                                    "min": null,
-                                    "max": null,
-                                    "fileExtension": ".txt",
-                                    "id": "param_1755170507529_eayylbtk6"
+                                    "fileExtension": ".txt"
                                 },
                                 {
+                                    "max": null,
+                                    "min": null,
                                     "name": "cell group",
                                     "type": "h5adParameter",
                                     "defaultValue": "",
-                                    "min": null,
-                                    "max": null,
-                                    "fileExtension": "",
-                                    "id": "param_1755170511966_uox60npa5"
+                                    "fileExtension": ""
                                 },
                                 {
+                                    "max": null,
+                                    "min": null,
                                     "name": "pseudotime",
                                     "type": "h5adParameter",
                                     "defaultValue": "",
-                                    "min": null,
-                                    "max": null,
-                                    "fileExtension": "",
-                                    "id": "param_1755170515972_0ly7fjn31"
+                                    "fileExtension": ""
                                 },
                                 {
+                                    "max": null,
+                                    "min": null,
                                     "name": "clusters",
                                     "type": "h5adParameter",
                                     "defaultValue": "",
-                                    "min": null,
-                                    "max": null,
-                                    "fileExtension": "",
-                                    "id": "param_1755170519045_akr59x3w8"
+                                    "fileExtension": ""
                                 }
-                            ]
+                            ],
+                            "isVisualization": false
                         },
-                        "class": "ruleNode",
                         "html": "ruleNode",
-                        "typenode": "vue",
+                        "name": "ruleNode",
+                        "class": "ruleNode",
+                        "pos_x": 103,
+                        "pos_y": 204,
                         "inputs": {
                             "input_1": {
                                 "connections": []
@@ -122,6 +115,10 @@
                                     {
                                         "node": "2",
                                         "output": "input_1"
+                                    },
+                                    {
+                                        "node": "4",
+                                        "output": "input_1"
                                     }
                                 ]
                             },
@@ -129,6 +126,10 @@
                                 "connections": [
                                     {
                                         "node": "2",
+                                        "output": "input_2"
+                                    },
+                                    {
+                                        "node": "4",
                                         "output": "input_2"
                                     }
                                 ]
@@ -142,12 +143,10 @@
                                 ]
                             }
                         },
-                        "pos_x": 66,
-                        "pos_y": 216
+                        "typenode": "vue"
                     },
                     "2": {
                         "id": 2,
-                        "name": "ruleNode",
                         "data": {
                             "title": "Run",
                             "inputs": [
@@ -156,145 +155,134 @@
                                 "cellSelect.txt",
                                 "TF.txt"
                             ],
-                            "outputs": [
-                                "resultMatrixFDR.sif",
-                                "resultMatrixFdrTrim.sif",
-                                "resultMatrixFdrOutdegree.txt",
-                                "resultMatrixFdrTrimOutdegree.txt"
-                            ],
                             "script": {},
+                            "outputs": [
+                                "GRN.sif",
+                                "GRNTrim.sif",
+                                "GRNOutdegree.txt",
+                                "GRNTrimOutdegree.txt"
+                            ],
                             "parameters": [
                                 {
+                                    "max": null,
+                                    "min": null,
                                     "name": "expression",
                                     "type": "inputFile",
                                     "defaultValue": "expression.csv",
-                                    "min": null,
-                                    "max": null,
-                                    "fileExtension": ".csv",
-                                    "id": "param_1755170700387_x24no9mu4"
+                                    "fileExtension": ".csv"
                                 },
                                 {
+                                    "max": null,
+                                    "min": null,
                                     "name": "trajectory",
                                     "type": "inputFile",
                                     "defaultValue": "trajectory.txt",
-                                    "min": null,
-                                    "max": null,
-                                    "fileExtension": ".txt",
-                                    "id": "param_1755170710221_ndpqvomar"
+                                    "fileExtension": ".txt"
                                 },
                                 {
+                                    "max": null,
+                                    "min": null,
                                     "name": "cellSelect",
                                     "type": "inputFile",
                                     "defaultValue": "cellSelect.txt",
-                                    "min": null,
-                                    "max": null,
-                                    "fileExtension": ".txt",
-                                    "id": "param_1755170716489_bvhfcvk2o"
+                                    "fileExtension": ".txt"
                                 },
                                 {
+                                    "max": null,
+                                    "min": null,
                                     "name": "TF",
                                     "type": "optionalInputFile",
                                     "defaultValue": "TF.txt",
-                                    "min": null,
-                                    "max": null,
-                                    "fileExtension": ".txt",
-                                    "id": "param_1755170724912_m0zr7akde"
+                                    "fileExtension": ".txt"
                                 },
                                 {
-                                    "name": "resultMatrixFDR",
+                                    "max": null,
+                                    "min": null,
+                                    "name": "GRN",
                                     "type": "outputFile",
-                                    "defaultValue": "resultMatrixFDR.sif",
-                                    "min": null,
-                                    "max": null,
-                                    "fileExtension": ".sif",
-                                    "id": "param_1755170733264_jjmx6dz56"
+                                    "defaultValue": "GRN.sif",
+                                    "fileExtension": ".sif"
                                 },
                                 {
-                                    "name": "resultMatrixFdrTrim",
+                                    "max": null,
+                                    "min": null,
+                                    "name": "GRNTrim",
                                     "type": "outputFile",
-                                    "defaultValue": "resultMatrixFdrTrim.sif",
-                                    "min": null,
-                                    "max": null,
-                                    "fileExtension": ".sif",
-                                    "id": "param_1755170741869_p31abkdzf"
+                                    "defaultValue": "GRNTrim.sif",
+                                    "fileExtension": ".sif"
                                 },
                                 {
-                                    "name": "resultMatrixFdrOutdegree",
+                                    "max": null,
+                                    "min": null,
+                                    "name": "GRNOutdegree",
                                     "type": "outputFile",
-                                    "defaultValue": "resultMatrixFdrOutdegree.txt",
-                                    "min": null,
-                                    "max": null,
-                                    "fileExtension": ".txt",
-                                    "id": "param_1755170751379_mvqi762ri"
+                                    "defaultValue": "GRNOutdegree.txt",
+                                    "fileExtension": ".txt"
                                 },
                                 {
-                                    "name": "resultMatrixFdrTrimOutdegree",
+                                    "max": null,
+                                    "min": null,
+                                    "name": "GRNTrimOutdegree",
                                     "type": "outputFile",
-                                    "defaultValue": "resultMatrixFdrTrimOutdegree.txt",
-                                    "min": null,
-                                    "max": null,
-                                    "fileExtension": ".txt",
-                                    "id": "param_1755170758822_4vcatwe5g"
+                                    "defaultValue": "GRNTrimOutdegree.txt",
+                                    "fileExtension": ".txt"
                                 },
                                 {
+                                    "max": null,
+                                    "min": null,
                                     "name": "backend",
                                     "type": "string",
                                     "defaultValue": "gpu",
-                                    "min": null,
-                                    "max": null,
-                                    "fileExtension": "",
-                                    "id": "param_1755170916434_1ukc4zfxf"
+                                    "fileExtension": ""
                                 },
                                 {
+                                    "max": null,
+                                    "min": 1,
                                     "name": "number of devices",
                                     "type": "int",
                                     "defaultValue": "1",
-                                    "min": 1,
-                                    "max": null,
-                                    "fileExtension": "",
-                                    "id": "param_1755170953032_pjhhysg6a"
+                                    "fileExtension": ""
                                 },
                                 {
+                                    "max": null,
+                                    "min": 2,
                                     "name": "batch size",
                                     "type": "int",
                                     "defaultValue": "32768",
-                                    "min": 2,
-                                    "max": null,
-                                    "fileExtension": "",
-                                    "id": "param_1755170975047_t7mea1or9"
+                                    "fileExtension": ""
                                 },
                                 {
+                                    "max": 1,
+                                    "min": 0,
                                     "name": "FDR",
                                     "type": "float",
                                     "defaultValue": "0.01",
-                                    "min": 0,
-                                    "max": 1,
-                                    "fileExtension": "",
-                                    "id": "param_1755170996984_8c8sxdepg"
+                                    "fileExtension": ""
                                 },
                                 {
+                                    "max": null,
+                                    "min": 0,
                                     "name": "number of outdegrees",
                                     "type": "int",
                                     "defaultValue": "0",
-                                    "min": 0,
-                                    "max": null,
-                                    "fileExtension": "",
-                                    "id": "param_1755171070698_9n7wnx7ph"
+                                    "fileExtension": ""
                                 },
                                 {
+                                    "max": null,
+                                    "min": null,
                                     "name": "trimming threshold",
                                     "type": "float",
                                     "defaultValue": "0",
-                                    "min": null,
-                                    "max": null,
-                                    "fileExtension": "",
-                                    "id": "param_1755171086562_z19swqtwf"
+                                    "fileExtension": ""
                                 }
-                            ]
+                            ],
+                            "isVisualization": false
                         },
-                        "class": "ruleNode",
                         "html": "ruleNode",
-                        "typenode": "vue",
+                        "name": "ruleNode",
+                        "class": "ruleNode",
+                        "pos_x": 516,
+                        "pos_y": 185,
                         "inputs": {
                             "input_1": {
                                 "connections": [
@@ -338,8 +326,211 @@
                                 "connections": []
                             }
                         },
-                        "pos_x": 382,
-                        "pos_y": 121
+                        "typenode": "vue"
+                    },
+                    "3": {
+                        "id": 3,
+                        "name": "ruleNode",
+                        "data": {
+                            "title": "Barplot",
+                            "inputs": [
+                                "target.sif"
+                            ],
+                            "outputs": [
+                                "Barplot.json"
+                            ],
+                            "script": {},
+                            "parameters": [
+                                {
+                                    "name": "target",
+                                    "type": "inputFile",
+                                    "defaultValue": "target.sif",
+                                    "min": null,
+                                    "max": null,
+                                    "fileExtension": ".sif"
+                                },
+                                {
+                                    "name": "output",
+                                    "type": "outputFile",
+                                    "defaultValue": "Barplot.json",
+                                    "fileExtension": ".json"
+                                },
+                                {
+                                    "name": "Top Genes",
+                                    "type": "int",
+                                    "defaultValue": "10",
+                                    "min": 5,
+                                    "max": null,
+                                    "fileExtension": ""
+                                }
+                            ],
+                            "isVisualization": true
+                        },
+                        "class": "visualizationNode",
+                        "html": "ruleNode",
+                        "typenode": "vue",
+                        "inputs": {
+                            "input_1": {
+                                "connections": []
+                            }
+                        },
+                        "outputs": {
+                            "output_1": {
+                                "connections": []
+                            }
+                        },
+                        "pos_x": 731,
+                        "pos_y": 69
+                    },
+                    "4": {
+                        "id": 4,
+                        "name": "ruleNode",
+                        "data": {
+                            "title": "Heatmap",
+                            "inputs": [
+                                "expression.csv",
+                                "trajectory.txt",
+                                "target.sif"
+                            ],
+                            "outputs": [
+                                "Heatmap.json"
+                            ],
+                            "script": {},
+                            "parameters": [
+                                {
+                                    "name": "expression",
+                                    "type": "inputFile",
+                                    "defaultValue": "expression.csv",
+                                    "min": null,
+                                    "max": null,
+                                    "fileExtension": ".csv"
+                                },
+                                {
+                                    "name": "trajectory",
+                                    "type": "inputFile",
+                                    "defaultValue": "trajectory.txt",
+                                    "min": null,
+                                    "max": null,
+                                    "fileExtension": ".txt"
+                                },
+                                {
+                                    "name": "target",
+                                    "type": "inputFile",
+                                    "defaultValue": "target.sif",
+                                    "min": null,
+                                    "max": null,
+                                    "fileExtension": ".sif"
+                                },
+                                {
+                                    "name": "output",
+                                    "type": "outputFile",
+                                    "defaultValue": "Heatmap.json",
+                                    "fileExtension": ".json"
+                                },
+                                {
+                                    "name": "Top Genes",
+                                    "type": "int",
+                                    "defaultValue": "10",
+                                    "min": 5,
+                                    "max": null,
+                                    "fileExtension": ""
+                                },
+                                {
+                                    "name": "Sample Size",
+                                    "type": "int",
+                                    "defaultValue": "100",
+                                    "min": 50,
+                                    "max": null,
+                                    "fileExtension": ""
+                                }
+                            ],
+                            "isVisualization": true
+                        },
+                        "class": "visualizationNode",
+                        "html": "ruleNode",
+                        "typenode": "vue",
+                        "inputs": {
+                            "input_1": {
+                                "connections": [
+                                    {
+                                        "node": "1",
+                                        "input": "output_1"
+                                    }
+                                ]
+                            },
+                            "input_2": {
+                                "connections": [
+                                    {
+                                        "node": "1",
+                                        "input": "output_2"
+                                    }
+                                ]
+                            },
+                            "input_3": {
+                                "connections": []
+                            }
+                        },
+                        "outputs": {
+                            "output_1": {
+                                "connections": []
+                            }
+                        },
+                        "pos_x": 768,
+                        "pos_y": 151
+                    },
+                    "5": {
+                        "id": 5,
+                        "name": "ruleNode",
+                        "data": {
+                            "title": "Network",
+                            "inputs": [
+                                "target.sif"
+                            ],
+                            "outputs": [
+                                "Network.json"
+                            ],
+                            "script": {},
+                            "parameters": [
+                                {
+                                    "name": "target",
+                                    "type": "inputFile",
+                                    "defaultValue": "target.sif",
+                                    "min": null,
+                                    "max": null,
+                                    "fileExtension": ".sif"
+                                },
+                                {
+                                    "name": "output",
+                                    "type": "outputFile",
+                                    "defaultValue": "Network.json",
+                                    "fileExtension": ".json"
+                                },
+                                {
+                                    "name": "Top Genes",
+                                    "type": "int",
+                                    "defaultValue": "50",
+                                    "min": 10,
+                                    "max": null,
+                                    "fileExtension": ""
+                                }
+                            ],
+                            "isVisualization": true
+                        },
+                        "class": "visualizationNode",
+                        "html": "ruleNode",
+                        "typenode": "vue",
+                        "inputs": {
+                            "input_1": {
+                                "connections": []
+                            }
+                        },
+                        "outputs": {
+                            "output_1": {
+                                "connections": []
+                            }
+                        },
+                        "pos_x": 756,
+                        "pos_y": 312
                     }
                 }
             }
@@ -376,8 +567,8 @@
                     "fileExtension": ".txt"
                 },
                 {
-                    "name": "UMAP lasso",
-                    "type": "h5adParameter",
+                    "name": "ScatterPlot",
+                    "type": "string",
                     "defaultValue": "",
                     "min": null,
                     "max": null,
@@ -444,10 +635,10 @@
                 "TF.txt"
             ],
             "output": [
-                "resultMatrixFDR.sif",
-                "resultMatrixFdrTrim.sif",
-                "resultMatrixFdrOutdegree.txt",
-                "resultMatrixFdrTrimOutdegree.txt"
+                "GRN.sif",
+                "GRNTrim.sif",
+                "GRNOutdegree.txt",
+                "GRNTrimOutdegree.txt"
             ],
             "script": "fasttenet_for_cellcraft.py",
             "parameters": [
@@ -484,33 +675,33 @@
                     "fileExtension": ".txt"
                 },
                 {
-                    "name": "resultMatrixFDR",
+                    "name": "GRN",
                     "type": "outputFile",
-                    "defaultValue": "resultMatrixFDR.sif",
+                    "defaultValue": "GRN.sif",
                     "min": null,
                     "max": null,
                     "fileExtension": ".sif"
                 },
                 {
-                    "name": "resultMatrixFdrTrim",
+                    "name": "GRNTrim",
                     "type": "outputFile",
-                    "defaultValue": "resultMatrixFdrTrim.sif",
+                    "defaultValue": "GRNTrim.sif",
                     "min": null,
                     "max": null,
                     "fileExtension": ".sif"
                 },
                 {
-                    "name": "resultMatrixFdrOutdegree",
+                    "name": "GRNOutdegree",
                     "type": "outputFile",
-                    "defaultValue": "resultMatrixFdrOutdegree.txt",
+                    "defaultValue": "GRNOutdegree.txt",
                     "min": null,
                     "max": null,
                     "fileExtension": ".txt"
                 },
                 {
-                    "name": "resultMatrixFdrTrimOutdegree",
+                    "name": "GRNTrimOutdegree",
                     "type": "outputFile",
-                    "defaultValue": "resultMatrixFdrTrimOutdegree.txt",
+                    "defaultValue": "GRNTrimOutdegree.txt",
                     "min": null,
                     "max": null,
                     "fileExtension": ".txt"
@@ -566,6 +757,146 @@
             ],
             "nodeId": 2,
             "isVisualization": false
+        },
+        "2": {
+            "name": "Barplot",
+            "input": [
+                "target.sif"
+            ],
+            "output": [
+                "Barplot.json"
+            ],
+            "script": "Barplot.py",
+            "parameters": [
+                {
+                    "name": "target",
+                    "type": "inputFile",
+                    "defaultValue": "target.sif",
+                    "min": null,
+                    "max": null,
+                    "fileExtension": ".sif"
+                },
+                {
+                    "name": "output",
+                    "type": "outputFile",
+                    "defaultValue": "Barplot.json",
+                    "min": null,
+                    "max": null,
+                    "fileExtension": ".json"
+                },
+                {
+                    "name": "Top Genes",
+                    "type": "int",
+                    "defaultValue": "10",
+                    "min": 5,
+                    "max": null,
+                    "fileExtension": ""
+                }
+            ],
+            "nodeId": 3,
+            "isVisualization": true
+        },
+        "3": {
+            "name": "Heatmap",
+            "input": [
+                "expression.csv",
+                "trajectory.txt",
+                "target.sif"
+            ],
+            "output": [
+                "Heatmap.json"
+            ],
+            "script": "Pseudotime_heatmap.R",
+            "parameters": [
+                {
+                    "name": "expression",
+                    "type": "inputFile",
+                    "defaultValue": "expression.csv",
+                    "min": null,
+                    "max": null,
+                    "fileExtension": ".csv"
+                },
+                {
+                    "name": "trajectory",
+                    "type": "inputFile",
+                    "defaultValue": "trajectory.txt",
+                    "min": null,
+                    "max": null,
+                    "fileExtension": ".txt"
+                },
+                {
+                    "name": "target",
+                    "type": "inputFile",
+                    "defaultValue": "target.sif",
+                    "min": null,
+                    "max": null,
+                    "fileExtension": ".sif"
+                },
+                {
+                    "name": "output",
+                    "type": "outputFile",
+                    "defaultValue": "Heatmap.json",
+                    "min": null,
+                    "max": null,
+                    "fileExtension": ".json"
+                },
+                {
+                    "name": "Top Genes",
+                    "type": "int",
+                    "defaultValue": "10",
+                    "min": 5,
+                    "max": null,
+                    "fileExtension": ""
+                },
+                {
+                    "name": "Sample Size",
+                    "type": "int",
+                    "defaultValue": "100",
+                    "min": 50,
+                    "max": null,
+                    "fileExtension": ""
+                }
+            ],
+            "nodeId": 4,
+            "isVisualization": true
+        },
+        "4": {
+            "name": "Network",
+            "input": [
+                "target.sif"
+            ],
+            "output": [
+                "Network.json"
+            ],
+            "script": "NetworkX.py",
+            "parameters": [
+                {
+                    "name": "target",
+                    "type": "inputFile",
+                    "defaultValue": "target.sif",
+                    "min": null,
+                    "max": null,
+                    "fileExtension": ".sif"
+                },
+                {
+                    "name": "output",
+                    "type": "outputFile",
+                    "defaultValue": "Network.json",
+                    "min": null,
+                    "max": null,
+                    "fileExtension": ".json"
+                },
+                {
+                    "name": "Top Genes",
+                    "type": "int",
+                    "defaultValue": "50",
+                    "min": 10,
+                    "max": null,
+                    "fileExtension": ""
+                }
+            ],
+            "nodeId": 5,
+            "isVisualization": true
         }
     }
 }

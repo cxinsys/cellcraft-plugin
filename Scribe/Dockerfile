@@ -1,210 +1,190 @@
-ARG TARGETPLATFORM=linux/amd64
-ARG BUILDPLATFORM=linux/amd64
+FROM debian:bullseye-slim
 
-FROM --platform=$TARGETPLATFORM debian:bullseye-slim
-
+# 비대화형 설치 설정
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=Asia/Seoul
 
+# 기본 패키지 설치
 RUN apt-get update && apt-get install -y \
     build-essential gcc g++ gfortran make \
-    libssl-dev libcurl4-openssl-dev libxml2-dev libxslt1-dev \
-    libjpeg-dev libpng-dev libfreetype6-dev libtiff5-dev \
-    libx11-dev libxt-dev xorg-dev \
-    libglu1-mesa-dev \
+    libssl-dev libcurl4-openssl-dev libxml2-dev \
+    libjpeg-dev libpng-dev libfreetype6-dev libtiff-dev \
+    libx11-dev libxt-dev \
+    libglu1-mesa-dev || libglu1-dev \
     libharfbuzz-dev libfribidi-dev \
     libglpk-dev \
     curl wget unzip git \
     python3 python3-pip python3-venv \
     software-properties-common \
     gnupg ca-certificates \
-    zlib1g-dev liblzma-dev \
-    rsync \
-    libv8-dev libnode-dev \
-    libudunits2-dev libgdal-dev \
-    libcairo2-dev \
-    libfontconfig1-dev \
-    libgeos-dev \
-    libproj-dev \
-    libmagick++-dev \
-    libpoppler-cpp-dev \
-    librsvg2-dev \
+    default-jdk-headless \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
+# Java 환경변수 설정
+ENV JAVA_HOME=/usr/lib/jvm/default-java
+ENV PATH=$JAVA_HOME/bin:$PATH
+
+# Java 버전 확인
+RUN java -version && javac -version
+
+# R 설치 (특정 버전)
+RUN apt-get update && \
+    apt-get install -y dirmngr gpg-agent && \
+    wget -qO- https://cloud.r-project.org/bin/linux/debian/marutter_pubkey.asc | \
+    tee -a /etc/apt/trusted.gpg.d/cran_debian_key.asc && \
+    echo 'deb https://cloud.r-project.org/bin/linux/debian bullseye-cran40/' | \
+    tee -a /etc/apt/sources.list.d/r-cran.list && \
+    apt-get update
+
+# R 4.4.2 설치 시도
+RUN (apt-get install -y r-base-core=4.4* r-recommended=4.4* r-base-dev=4.4* 2>/dev/null) || \
+    (echo 'Specific R version 4.4.2 not available, installing latest' && \
+     apt-get install -y r-base r-base-dev r-recommended) && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# R 버전 확인
+RUN R --version | head -1
+
+# dependency 폴더 복사
 COPY dependency/ /workspace/dependency/
 
-RUN PLATFORM=${TARGETPLATFORM:-linux/amd64} && \
-    case $PLATFORM in \
-        "linux/amd64")  MICROMAMBA_ARCH=linux-64  ;; \
-        "linux/arm64")  MICROMAMBA_ARCH=linux-aarch64  ;; \
-        "linux/arm/v7") MICROMAMBA_ARCH=linux-armv7l  ;; \
-        *) echo "Unsupported platform: $PLATFORM, defaulting to linux-64" && MICROMAMBA_ARCH=linux-64 ;; \
-    esac && \
-    mkdir -p /usr/local/bin && \
-    curl -Ls "https://micro.mamba.pm/api/micromamba/${MICROMAMBA_ARCH}/latest" | tar -xvj -C /tmp && \
-    cp /tmp/bin/micromamba /usr/local/bin/micromamba && \
+# 디버깅: dependency 폴더 내용 확인
+RUN echo '[DEBUG] Contents of /workspace/dependency folder:' && \
+    ls -la /workspace/dependency/ && \
+    echo '[DEBUG] Detailed file information:' && \
+    find /workspace/dependency -type f -exec ls -lh {} \; && \
+    echo '[DEBUG] File contents preview:' && \
+    for file in /workspace/dependency/*.txt /workspace/dependency/*.yml /workspace/dependency/*.yaml /workspace/dependency/*.lock; do \
+        if [ -f "$file" ]; then \
+            echo "=== Contents of $(basename $file) ==="; \
+            head -20 "$file" || echo "Could not read $file"; \
+            echo ""; \
+        fi; \
+    done
+
+# Micromamba 설치
+RUN mkdir -p /usr/local/bin && \
+    cd /tmp && \
+    curl -Ls https://micro.mamba.pm/api/micromamba/linux-64/latest | tar -xvj && \
+    cp bin/micromamba /usr/local/bin/micromamba && \
     chmod +x /usr/local/bin/micromamba && \
     rm -rf /tmp/bin /tmp/info && \
+    # 설치 확인
     /usr/local/bin/micromamba --version
 
+# 환경 변수 설정
 ENV MAMBA_ROOT_PREFIX=/opt/micromamba
 ENV MAMBA_EXE=/usr/local/bin/micromamba
 ENV PATH=/usr/local/bin:$MAMBA_ROOT_PREFIX/envs/plugin_env/bin:$MAMBA_ROOT_PREFIX/bin:$PATH
-ENV R_HOME=/opt/micromamba/envs/plugin_env/lib/R
 
+# Micromamba 환경 디렉토리 생성
 RUN mkdir -p $MAMBA_ROOT_PREFIX && \
     mkdir -p $MAMBA_ROOT_PREFIX/envs && \
     mkdir -p $MAMBA_ROOT_PREFIX/pkgs && \
     mkdir -p $MAMBA_ROOT_PREFIX/etc/profile.d
 
+# Python 환경 생성
 RUN /usr/local/bin/micromamba create -y -n plugin_env python=3.10 -c conda-forge --root-prefix $MAMBA_ROOT_PREFIX
 
+# Snakemake 및 필수 패키지 설치
 RUN /usr/local/bin/micromamba run -n plugin_env -r $MAMBA_ROOT_PREFIX \
     pip install --no-cache-dir \
     'snakemake==7.14.0' \
     'pulp==2.7.0' \
     'tabulate==0.8.10'
 
+# Python 패키지 설치
 RUN /usr/local/bin/micromamba run -n plugin_env -r $MAMBA_ROOT_PREFIX \
     pip install --no-cache-dir -r /workspace/dependency/requirements.txt || true
 
-RUN /usr/local/bin/micromamba install -y -n plugin_env \
-    r-base=4.4.2 \
-    r-essentials \
-    r-renv \
-    r-jsonlite \
-    zlib \
-    xz \
-    libpng \
-    libjpeg-turbo \
-    libcurl \
-    libxml2 \
-    libxslt \
-    cairo \
-    pango \
-    harfbuzz \
-    fribidi \
-    freetype \
-    fontconfig \
-    libtiff \
-    pkg-config \
-    -c conda-forge \
-    -r $MAMBA_ROOT_PREFIX && \
-    ln -sf $MAMBA_ROOT_PREFIX/envs/plugin_env/bin/R /usr/local/bin/R && \
-    ln -sf $MAMBA_ROOT_PREFIX/envs/plugin_env/bin/Rscript /usr/local/bin/Rscript
+# R 패키지 설치 - 시스템 라이브러리에 직접 설치
+RUN Rscript -e "options(repos = c(CRAN = 'https://cloud.r-project.org'), download.file.method = 'libcurl')"
 
-RUN echo 'options(repos = c(CRAN = "https://cloud.r-project.org"), download.file.method = "libcurl")' > /root/.Rprofile && \
-    /usr/local/bin/micromamba run -n plugin_env -r $MAMBA_ROOT_PREFIX \
-    Rscript -e "install.packages(c('renv', 'BiocManager'), dependencies = TRUE)"
+# renv 설치
+RUN Rscript -e "install.packages('renv')"
 
+# renv.lock을 사용해서 시스템 라이브러리에 직접 패키지 설치
 RUN if [ -f "/workspace/dependency/renv.lock" ]; then \
-    echo 'Installing R packages from renv.lock...' && \
-    /usr/local/bin/micromamba run -n plugin_env -r $MAMBA_ROOT_PREFIX \
-    Rscript -e "\
-        # Set micromamba environment as primary library path \
-        target_lib <- '/opt/micromamba/envs/plugin_env/lib/R/library'; \
-        .libPaths(c(target_lib, .libPaths())); \
-        cat('Library paths configured:', paste(.libPaths(), collapse=', '), '\\n'); \
-        \
-        # Change to dependency directory for renv operations \
-        setwd('/workspace/dependency'); \
-        \
-        # Load renv and configure \
-        library(renv); \
-        options(renv.config.cache.enabled = FALSE); \
-        options(renv.config.auto.snapshot = FALSE); \
-        \
-        # Initialize renv project \
-        cat('Initializing renv project...\\n'); \
-        renv::init(bare = TRUE, restart = FALSE); \
-        \
-        # Restore packages to renv library \
-        cat('Restoring packages from renv.lock...\\n'); \
-        tryCatch({ \
-            renv::restore(lockfile = '/workspace/dependency/renv.lock', confirm = FALSE); \
-            cat('✅ R packages successfully installed to renv library\\n'); \
-        }, error = function(e) { \
-            cat('⚠️ Some packages may have failed, but continuing...\\n'); \
-            cat('Error details:', conditionMessage(e), '\\n'); \
-        }); \
-    " && \
-    echo 'renv installation phase completed' ; \
-fi
+    echo 'Installing packages from renv.lock...' && \
+    # dependency 폴더로 이동 (로컬 패키지 파일들이 있는 곳) \
+    cd /workspace/dependency && \
+    # 로컬 패키지 파일 확인 \
+    ls -la *.tar.gz 2>/dev/null || echo 'No local package files found' && \
+    # renv restore 실행 \
+    Rscript -e "Sys.setenv(RENV_PATHS_LIBRARY = .libPaths()[1])" && \
+    Rscript -e "renv::restore(lockfile = 'renv.lock', library = .libPaths()[1], prompt = FALSE)" && \
+    Rscript -e "cat('\\nInstalled packages:\\n'); print(installed.packages()[, c('Package', 'Version')])"; \
+    fi
 
-RUN if [ -d "/workspace/dependency/renv/library" ]; then \
-    echo '=== Stage 1: Starting complete rsync copy ===' && \
-    RENV_LIB_PATH="/workspace/dependency/renv/library/linux-debian-bullseye/R-4.4/x86_64-conda-linux-gnu" && \
-    TARGET_LIB_PATH="/opt/micromamba/envs/plugin_env/lib/R/library" && \
-    if [ -d "$RENV_LIB_PATH" ]; then \
-        echo "Copy source: $RENV_LIB_PATH" && \
-        echo "Copy target: $TARGET_LIB_PATH" && \
-        echo "Packages to copy:" && \
-        ls -1 "$RENV_LIB_PATH" | wc -l && echo " packages" && \
-        echo "Starting rsync copy..." && \
-        rsync -av --progress "$RENV_LIB_PATH/" "$TARGET_LIB_PATH/" && \
-        echo "✅ rsync copy completed" && \
-        echo "Post-copy package verification:" && \
-        ls -1 "$TARGET_LIB_PATH" | wc -l && echo " packages" ; \
-    else \
-        echo "⚠️ Cannot find renv library path: $RENV_LIB_PATH" ; \
-    fi ; \
-else \
-    echo "⚠️ renv library directory does not exist" ;fi
+# 추가 필수 패키지 확인 및 설치
+RUN Rscript -e " \
+    required_pkgs <- c('optparse', 'jsonlite', 'readr', 'dplyr', 'ggplot2', 'pheatmap', 'plotly'); \
+    missing_pkgs <- required_pkgs[!required_pkgs %in% installed.packages()[,'Package']]; \
+    if (length(missing_pkgs) > 0) { \
+        cat('Installing missing packages:', paste(missing_pkgs, collapse=', '), '\\n'); \
+        # BiocManager가 필요한 경우를 위해 먼저 설치 \
+        if (!requireNamespace('BiocManager', quietly = TRUE)) { \
+            install.packages('BiocManager') \
+        }; \
+        # 일반 CRAN 패키지 설치 시도 \
+        cran_pkgs <- missing_pkgs[missing_pkgs %in% c('optparse', 'jsonlite', 'readr', 'dplyr', 'ggplot2', 'plotly')]; \
+        if (length(cran_pkgs) > 0) { \
+            install.packages(cran_pkgs, dependencies = TRUE) \
+        }; \
+        # pheatmap은 의존성이 많으므로 별도 처리 \
+        if ('pheatmap' %in% missing_pkgs) { \
+            install.packages('pheatmap', dependencies = TRUE) \
+        } \
+    }; \
+    # 설치 확인 \
+    cat('\\nChecking installed packages:\\n'); \
+    for (pkg in required_pkgs) { \
+        if (pkg %in% installed.packages()[,'Package']) { \
+            cat(paste(pkg, 'is installed\\n')) \
+        } else { \
+            cat(paste('WARNING:', pkg, 'is NOT installed\\n')) \
+        } \
+    } \
+    "
 
-RUN echo '=== Stage 2: Cleanup temporary files for space optimization ===' && \
-    echo '=== Stage 2: Starting temporary file cleanup ===' && \
-    # Remove renv temporary library directory \
-    if [ -d "/workspace/dependency/renv/library" ]; then \
-        echo 'Removing renv temporary library...' && \
-        RENV_LIB_SIZE=$(du -sh /workspace/dependency/renv/library 2>/dev/null | cut -f1 || echo "unknown") && \
-        echo "renv library size to remove: $RENV_LIB_SIZE" && \
-        rm -rf /workspace/dependency/renv/library && \
-        echo '✅ renv temporary library removal completed' ; \
-    fi && \
-    # Remove renv cache \
-    if [ -d "/root/.cache/R/renv" ]; then \
-        echo 'Removing renv cache...' && \
-        CACHE_SIZE=$(du -sh /root/.cache/R/renv 2>/dev/null | cut -f1 || echo "unknown") && \
-        echo "Cache size to remove: $CACHE_SIZE" && \
-        rm -rf /root/.cache/R/renv && \
-        echo '✅ renv cache removal completed' ; \
-    fi && \
-    # Remove rsync package \
-    echo 'Removing rsync package...' && \
-    apt-get remove -y rsync && \
-    apt-get autoremove -y && \
-    echo '✅ rsync package removal completed' && \
-    echo '=== Stage 2: Temporary file cleanup completed ==='
-
-RUN /usr/local/bin/micromamba run -n plugin_env -r $MAMBA_ROOT_PREFIX \
-    Rscript -e "if (!requireNamespace('optparse', quietly = TRUE)) install.packages('optparse', dependencies = TRUE)"
-
+# renv 자동 활성화 비활성화를 위한 환경 변수
 ENV RENV_CONFIG_AUTOLOADER_ENABLED=FALSE
 
+# R 환경 변수 설정
+ENV R_HOME=/usr/lib/R
+
+# 작업 디렉토리 생성 및 설정
 RUN mkdir -p /workspace/logs && \
     chmod 777 /workspace
 
+# Snakefile 복사
 COPY Snakefile /workspace/Snakefile
+COPY visualization_Snakefile /workspace/visualization_Snakefile
 
+# scripts 폴더 복사
 COPY scripts/ /scripts/
 
 WORKDIR /workspace
 
-RUN echo '#!/bin/bash' > /entrypoint.sh && \
-    echo 'export MAMBA_ROOT_PREFIX=/opt/micromamba' >> /entrypoint.sh && \
-    echo 'export MAMBA_EXE=/usr/local/bin/micromamba' >> /entrypoint.sh && \
-    echo 'export PATH=$MAMBA_ROOT_PREFIX/envs/plugin_env/bin:$PATH' >> /entrypoint.sh && \
-    echo 'export R_HOME=/opt/micromamba/envs/plugin_env/lib/R' >> /entrypoint.sh && \
-    echo 'export R_LIBS_USER=/opt/micromamba/envs/plugin_env/lib/R/library' >> /entrypoint.sh && \
-    echo 'export RENV_CONFIG_AUTOLOADER_ENABLED=FALSE' >> /entrypoint.sh && \
-    echo 'eval "$($MAMBA_EXE shell activate -s bash -p $MAMBA_ROOT_PREFIX plugin_env)" 2>/dev/null || true' >> /entrypoint.sh && \
-    echo 'cd /workspace' >> /entrypoint.sh && \
-    echo 'exec "$@"' >> /entrypoint.sh && \
-    chmod +x /entrypoint.sh
+# Entrypoint 스크립트 생성
+RUN echo '#!/bin/bash' > /entrypoint.sh
+RUN echo 'export MAMBA_ROOT_PREFIX=/opt/micromamba' >> /entrypoint.sh
+RUN echo 'export MAMBA_EXE=/usr/local/bin/micromamba' >> /entrypoint.sh
+RUN echo 'export PATH=$MAMBA_ROOT_PREFIX/envs/plugin_env/bin:$PATH' >> /entrypoint.sh
+RUN echo '# Set R environment' >> /entrypoint.sh
+RUN echo 'export R_HOME=/usr/lib/R' >> /entrypoint.sh
+RUN echo 'export RENV_CONFIG_AUTOLOADER_ENABLED=FALSE' >> /entrypoint.sh
+RUN echo '# Activate micromamba environment' >> /entrypoint.sh
+RUN echo 'eval "$($MAMBA_EXE shell activate -s bash -p $MAMBA_ROOT_PREFIX plugin_env)" 2>/dev/null || true' >> /entrypoint.sh
+RUN echo 'cd /workspace' >> /entrypoint.sh
+RUN echo 'exec "$@"' >> /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
 
+# 헬스체크 설정
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD test -f /opt/micromamba/envs/plugin_env/bin/python || exit 1
 
+# 기본 명령어 설정
 CMD ["/bin/bash"]
