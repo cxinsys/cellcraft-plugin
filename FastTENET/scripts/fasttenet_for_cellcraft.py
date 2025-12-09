@@ -5,9 +5,6 @@ import os.path as osp
 
 import numpy as np
 
-# from fasttenet.fasttenet import FastTENET
-# from fasttenet.utils import *
-# from fasttenet.inference.inference import NetWeaver
 import fasttenet as fte
 
 if __name__ == "__main__":
