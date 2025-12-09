@@ -1,18 +1,12 @@
 import os
 import sys
 
-current_dir = os.path.dirname(os.path.abspath(__file__))
-fastscode_root = os.path.abspath(os.path.join(current_dir, 'fastscode'))
-sys.path.append(current_dir)
-
 import os.path as osp
 
 import numpy as np
 
-from fastscode.fastscode import FastSCODE
+import fastscode as fs
 from fastscode.inference.inference import NetWeaver
-
-
 
 if __name__ == "__main__":
     dpath_exp_data = sys.argv[1]  # expression data
@@ -41,9 +35,9 @@ if __name__ == "__main__":
     links = int(sys.argv[11])
     trim_threshold = float(sys.argv[12])
 
-    As = []
+    scores = np.zeros((len(exp_data), len(exp_data)), dtype=np.float32)
     for r in repeats:
-        worker = FastSCODE(exp_data=exp_data,
+        worker = fs.FastSCODE(exp_data=exp_data,
                               pseudotime=pseudotime,
                               node_name=node_name,
                               droot=None,
@@ -51,16 +45,17 @@ if __name__ == "__main__":
                               num_cell=None,
                               num_z=num_z,
                               max_iter=max_iter,
-                              dtype=np.float64)
+                              dtype=np.float32)
 
-        rss, W, A, B = worker.run(backend=backend,
-                                  device_ids=num_devices,
-                                  sampling_batch=sb,
-                                  chunk_size=chunk_size)
+        rss, score_matrix = worker.run(backend=backend,
+                                        device_ids=num_devices,
+                                        batch_size_b=sb,
+                                        batch_size=None,
+                                        chunk_size=chunk_size)
 
-        As.append(A)
+        scores += score_matrix
 
-    mean_A = np.mean(As, axis=0)
+    mean_A = scores / repeats
     # RSS, W, A and B will save under the droot directory
 
     weaver = NetWeaver(result_matrix=mean_A,
