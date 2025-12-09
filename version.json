@@ -1,8 +1,8 @@
 {
-  "branch": "release/plugins-v1.0",
-  "version": "1.0",
-  "build_time": "2025-09-11T14:03:00+09:00",
-  "commit": "0c9507b8c7205b71b4e94144fdeeb276465ba378",
+  "branch": "release/plugins-v1.1",
+  "version": "1.1",
+  "build_time": "2025-12-09T00:00:00+09:00",
+  "commit": "bb1d62f326335c2cedb590e7164eaf3144fd4c87",
   "plugins": [
     "FastSCODE",
     "FastTENET",
