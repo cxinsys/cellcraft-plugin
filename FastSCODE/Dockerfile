@@ -41,7 +41,7 @@ RUN /usr/local/bin/micromamba create -y -n plugin_env python=3.11 -c conda-forge
 
 RUN /usr/local/bin/micromamba run -n plugin_env -r $MAMBA_ROOT_PREFIX \
     pip install --no-cache-dir \
-    'snakemake==7.14.0' \
+    'snakemake==7.32.0' \
     'pulp==2.7.0' \
     'tabulate==0.8.10'
 
