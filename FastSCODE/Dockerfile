@@ -37,7 +37,7 @@ RUN mkdir -p $MAMBA_ROOT_PREFIX && \
     mkdir -p $MAMBA_ROOT_PREFIX/pkgs && \
     mkdir -p $MAMBA_ROOT_PREFIX/etc/profile.d
 
-RUN /usr/local/bin/micromamba create -y -n plugin_env python=3.10 -c conda-forge --root-prefix $MAMBA_ROOT_PREFIX
+RUN /usr/local/bin/micromamba create -y -n plugin_env python=3.11 -c conda-forge --root-prefix $MAMBA_ROOT_PREFIX
 
 RUN /usr/local/bin/micromamba run -n plugin_env -r $MAMBA_ROOT_PREFIX \
     pip install --no-cache-dir \
