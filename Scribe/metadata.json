@@ -10,7 +10,7 @@
                         "id": 1,
                         "name": "ruleNode",
                         "data": {
-                            "title": "TENET Input",
+                            "title": "Scribe Input",
                             "inputs": [
                                 "input.h5ad",
                                 "geneList.txt"
@@ -330,7 +330,7 @@
     },
     "rules": {
         "0": {
-            "name": "TENET Input",
+            "name": "Scribe Input",
             "input": [
                 "input.h5ad",
                 "geneList.txt"
@@ -340,7 +340,7 @@
                 "trajectory.txt",
                 "cellSelect.txt"
             ],
-            "script": "tenet_input.py",
+            "script": "scribe_input.py",
             "parameters": [
                 {
                     "name": "input",
