@@ -1,6 +1,6 @@
 import os
 
-rule TENET_Input:
+rule GENIE3_Input:
     input:
         input="user/{user_name}/data/{input.h5ad}"
     output:
@@ -14,10 +14,10 @@ rule TENET_Input:
         pseudotime={pseudotime},
         clusters=lambda wc: ";".join({clusters})
     log:
-        stdout="user/{user_name}/workflow_{workflow_id}/algorithm_{algorithm_id}/logs/TENET_Input.stdout",
-        stderr="user/{user_name}/workflow_{workflow_id}/algorithm_{algorithm_id}/logs/TENET_Input.stderr"
+        stdout="user/{user_name}/workflow_{workflow_id}/algorithm_{algorithm_id}/logs/GENIE3_Input.stdout",
+        stderr="user/{user_name}/workflow_{workflow_id}/algorithm_{algorithm_id}/logs/GENIE3_Input.stderr"
     shell:
-        "/opt/micromamba/envs/plugin_env/bin/python /scripts/tenet_input.py {input.input} {params.geneList} {params.UMAP_lasso} {output.expression} {output.trajectory} {output.cellSelect} {params.cell_group} {params.pseudotime} '{params.clusters}' > {log.stdout} 2> {log.stderr}"
+        "/opt/micromamba/envs/plugin_env/bin/python /scripts/genie3_input.py {input.input} {params.geneList} {params.UMAP_lasso} {output.expression} {output.trajectory} {output.cellSelect} {params.cell_group} {params.pseudotime} '{params.clusters}' > {log.stdout} 2> {log.stderr}"
 
 rule Run:
     input:

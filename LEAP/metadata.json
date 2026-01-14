@@ -10,7 +10,7 @@
                         "id": 1,
                         "name": "ruleNode",
                         "data": {
-                            "title": "TENET Input",
+                            "title": "LEAP Input",
                             "inputs": [
                                 "input.h5ad",
                                 "geneList.txt"
@@ -281,7 +281,7 @@
     },
     "rules": {
         "0": {
-            "name": "TENET Input",
+            "name": "LEAP Input",
             "input": [
                 "input.h5ad",
                 "geneList.txt"
@@ -291,7 +291,7 @@
                 "trajectory.txt",
                 "cellSelect.txt"
             ],
-            "script": "tenet_input.py",
+            "script": "leap_input.py",
             "parameters": [
                 {
                     "name": "input",
