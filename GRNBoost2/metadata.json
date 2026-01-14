@@ -9,7 +9,7 @@
                     "1": {
                         "id": 1,
                         "data": {
-                            "title": "TENET Input",
+                            "title": "GRNBoost2 Input",
                             "inputs": [
                                 "input.h5ad",
                                 "geneList.txt"
@@ -285,7 +285,7 @@
     },
     "rules": {
         "0": {
-            "name": "TENET Input",
+            "name": "GRNBoost2 Input",
             "input": [
                 "input.h5ad",
                 "geneList.txt"
@@ -295,7 +295,7 @@
                 "trajectory.txt",
                 "cellSelect.txt"
             ],
-            "script": "tenet_input.py",
+            "script": "grnboost2_input.py",
             "parameters": [
                 {
                     "name": "input",

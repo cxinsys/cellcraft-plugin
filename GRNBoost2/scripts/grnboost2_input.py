@@ -74,7 +74,7 @@ def synch_raw_counts(adata):
     except KeyError as e:
         print("Your adata object does not contain raw counts", e)
 
-def tenet_input_make(adata, path_exp, path_pseudo, path_cell_select, pseudotime_column = 'dpt_pseudotime', gene_list = []):
+def grnboost2_input_make(adata, path_exp, path_pseudo, path_cell_select, pseudotime_column = 'dpt_pseudotime', gene_list = []):
     try:
         if 'counts' not in adata.layers:
             print("adata.layers에 'counts' 키가 없습니다. 먼저 raw count 데이터를 설정해주세요.")
@@ -175,5 +175,5 @@ if adata.shape[0] == 0:
 # adata.layers['counts']에 존재하도록 데이터 구조 동기화
 synch_raw_counts(adata)
     
-# tenet inputfile 생성
-tenet_input_make(adata, expMatrix, pseudotime, cellSelect, pseudotime_column = pseudo_of_interest, gene_list = gene_list)
+# grnboost2 inputfile 생성
+grnboost2_input_make(adata, expMatrix, pseudotime, cellSelect, pseudotime_column = pseudo_of_interest, gene_list = gene_list)
