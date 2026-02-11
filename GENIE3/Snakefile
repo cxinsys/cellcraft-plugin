@@ -2,13 +2,13 @@ import os
 
 rule GENIE3_Input:
     input:
-        input="user/{user_name}/data/{input.h5ad}"
+        input="{input.h5ad}"
     output:
         expression="user/{user_name}/workflow_{workflow_id}/algorithm_{algorithm_id}/results/expression.csv",
         trajectory="user/{user_name}/workflow_{workflow_id}/algorithm_{algorithm_id}/results/trajectory.txt",
         cellSelect="user/{user_name}/workflow_{workflow_id}/algorithm_{algorithm_id}/results/cellSelect.txt"
     params:
-        geneList=lambda wildcards: "user/{user_name}/data/{geneList.txt}" if os.path.exists("user/{user_name}/data/{geneList.txt}") else "None",
+        geneList=lambda wildcards: "{geneList.txt}" if os.path.exists("{geneList.txt}") else "None",
         UMAP_lasso=lambda wildcards: {UMAP lasso} if os.path.exists({UMAP lasso}) else "None",
         cell_group={cell group},
         pseudotime={pseudotime},
@@ -28,7 +28,7 @@ rule Run:
         GRN="user/{user_name}/workflow_{workflow_id}/algorithm_{algorithm_id}/results/GRN.sif",
         GRNOutdegree="user/{user_name}/workflow_{workflow_id}/algorithm_{algorithm_id}/results/GRNOutdegree.txt"
     params:
-        TF=lambda wildcards: "user/{user_name}/data/{TF.txt}" if os.path.exists("user/{user_name}/data/{TF.txt}") else "None",
+        TF=lambda wildcards: "{TF.txt}" if os.path.exists("{TF.txt}") else "None",
         FDR={FDR},
         number_of_outdegrees={number of outdegrees}
     log:
